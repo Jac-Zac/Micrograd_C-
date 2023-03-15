@@ -34,7 +34,7 @@ int main() {
     std::cout << "Starting Training\n";
     std::cout << "----------------------------\n\n";
 
-    for (size_t j = 1; j <= 500; j++) {
+    for (size_t j = 1; j <= 100; j++) {
         // Reset in case it is not the first loop
         ypred.clear();
         tmp_loss.clear();
@@ -64,7 +64,7 @@ int main() {
         loss.backward();
 
         // Change the learning rate
-        if (j < 100) {
+        if (j < 500) {
             lr = 0.5;
         } else {
             lr = 0.1;
@@ -77,9 +77,6 @@ int main() {
         }
 
         std::cout << "The loss at step: " << j << " is: " << loss.data << '\n';
-
-        if (j == 500) {
-            loss.draw_graph();
-        }
+        /* loss.draw_graph(); */
     }
 }
