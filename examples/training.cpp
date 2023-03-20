@@ -3,7 +3,8 @@
 using namespace nn;
 
 #define SIZE 3
-#define BATCH 4
+#define BATCH 1
+/* #define BATCH 4 */
 #define DATASET_SIZE 4
 
 typedef double TYPE;
@@ -34,7 +35,7 @@ int main() {
     std::cout << "Starting Training\n";
     std::cout << "----------------------------\n\n";
 
-    for (size_t j = 1; j <= 100; j++) {
+    for (size_t j = 1; j <= 10000; j++) {
         // Reset in case it is not the first loop
         ypred.clear();
         tmp_loss.clear();
@@ -51,14 +52,15 @@ int main() {
             ypred.emplace_back(model(xs[i]));
 
             // Mean Squared Error tmp
-            tmp_loss.emplace_back(ypred[i][SIZE][0] - ys[i]);
+            /* tmp_loss.emplace_back(ypred[i][SIZE][0] - ys[i]); */
+            loss = ypred[i][SIZE][0] - ys[i];
         }
 
         // I have to compute this outside to allow the gradient to propagate
         // correctly
-        for (size_t i = 0; i < BATCH; i++) {
-            loss += tmp_loss[i] ^ 2;
-        }
+        /* for (size_t i = 0; i < BATCH; i++) { */
+        /*     loss += tmp_loss[i] ^ 2; */
+        /* } */
 
         // backward pass
         loss.backward();
@@ -73,10 +75,11 @@ int main() {
         // Update parameters thanks to the gradient
         for (auto &p : model.parameters()) {
             // Update parameter value
-            p->data += -lr * (p->grad);
+            /* p->data += -lr * (p->grad); */
         }
 
-        std::cout << "The loss at step: " << j << " is: " << loss.data << '\n';
-        /* loss.draw_graph(); */
+        /* std::cout << "The loss at step: " << j << " is: " << loss.data << '\n'; */
+        loss.draw_graph();
+        if (j == 1) break;
     }
 }

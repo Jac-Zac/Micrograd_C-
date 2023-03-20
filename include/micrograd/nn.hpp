@@ -14,7 +14,8 @@ template <typename T> T random_uniform(T range_from, T range_to) {
     std::random_device rand_dev;
     std::mt19937 generator(rand_dev());
     std::uniform_real_distribution<T> distr(range_from, range_to);
-    return distr(generator);
+    /* return distr(generator); */
+    return 1.0;
 }
 
 // THIS IS NOT THE MOST EFFICIENT IMPLEMENTATION BUT SAVES ALL THE INTERMEDIATE
@@ -121,7 +122,9 @@ template <typename T> Value<T> Neuron<T>::operator()(Value_Vec<T> &x) {
     *m_weighted_sum += m_bias;
 
     // return the activated value
-    return m_weighted_sum->tanh();
+    /* return m_weighted_sum->tanh(); */
+    // Use relue to test
+    return m_weighted_sum->relu();
 }
 
 template <typename T> std::vector<Value<T> *> Neuron<T>::parameters() {

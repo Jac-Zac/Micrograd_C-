@@ -5,7 +5,7 @@ set(CMAKE_CROSSCOMPILING "True")
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_CXX_FLAGS "-O2")
+set(CMAKE_CXX_FLAGS "-O3")
 
 file(GLOB_RECURSE SOURCES
       micrograd/*.cpp
