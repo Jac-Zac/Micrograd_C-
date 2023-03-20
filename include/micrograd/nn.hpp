@@ -224,12 +224,13 @@ std::vector<Value<T> *> MLP<T, N>::parameters() {
 // Overloading for the output to standard out ---------------------------
 
 template <typename T, size_t N>
-std::ostream &operator<<(std::ostream &os, const MLP<T, N> &mlp) {
+std::ostream &operator<<(std::ostream &os, MLP<T, N> &mlp) {
     os << "Network of " << N + 1 << " Layers: [ " << mlp.m_num_neurons_in;
     for (size_t i = 0; i < N; i++) {
         os << " , " << mlp.m_num_neurons_out[i];
     }
     os << " ]\n";
+    os << "Number of parameters: " << mlp.parameters().size()<< '\n';
     return os;
 }
 } // namespace nn

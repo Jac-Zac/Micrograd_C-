@@ -3,7 +3,7 @@
 using namespace nn;
 
 #define SIZE 3
-#define BATCH 1
+#define BATCH 4
 /* #define BATCH 4 */
 #define DATASET_SIZE 4
 
@@ -52,15 +52,14 @@ int main() {
             ypred.emplace_back(model(xs[i]));
 
             // Mean Squared Error tmp
-            /* tmp_loss.emplace_back(ypred[i][SIZE][0] - ys[i]); */
-            loss = ypred[i][SIZE][0] - ys[i];
+            tmp_loss.emplace_back(ypred[i][SIZE][0] - ys[i]);
         }
 
         // I have to compute this outside to allow the gradient to propagate
         // correctly
-        /* for (size_t i = 0; i < BATCH; i++) { */
-        /*     loss += tmp_loss[i] ^ 2; */
-        /* } */
+        for (size_t i = 0; i < BATCH; i++) {
+            loss += tmp_loss[i] ^ 2;
+        }
 
         // backward pass
         loss.backward();
