@@ -25,7 +25,9 @@ enum ops_type : char {
     EXP = 'e',
     NEG = 'n',
     TANH = 't',
-    RELU = 'r'
+    RELU = 'r',
+    LRELU = 'l',
+    SWISH = 's'
 };
 
 template <typename T> class Value {
@@ -109,6 +111,8 @@ public:
     Value<T> exp_value();
     Value<T> tanh();
     Value<T> relu();
+    Value<T> lrelu();
+    Value<T> swish();
 
     void backward();
     void draw_graph();
@@ -137,6 +141,16 @@ template <typename T> Value<T> Value<T>::tanh() {
 
 template <typename T> Value<T> Value<T>::relu() {
     return Value<T>(data < 0.0 ? 0.0 : data, "", RELU, {this, nullptr});
+}
+
+template <typename T> Value<T> Value<T>::lrelu() {
+    return Value<T>(data > 0.0 ? data : 0.01 * data, "", LRELU, {this, nullptr});
+}
+
+template <typename T> Value<T> Value<T>::swish() {
+    // swish = x * sigmoid(x)
+    // sigmoid = 1/(1 + e^-x)
+    return Value<T>(data / (1.0 + std::exp(-data)), "", SWISH, {this, nullptr});
 }
 
 template <typename T> void Value<T>::_backward_single() {
@@ -180,6 +194,14 @@ template <typename T> void Value<T>::_backward_single() {
         break;
     case RELU:
         m_prev[0]->_update_grad(data > 0.0 ? (1.0 * grad) : 0.0);
+        break;
+    case LRELU:
+        m_prev[0]->_update_grad(data > 0.0 ? (1.0 * grad) : 0.01 * grad);
+        break;
+    case SWISH:
+        // keep in mind that data = swish(m_prev[0]->data)
+        // and f'(x) = f(x) + sigmoid(x)(1 + f(x))
+        m_prev[0]->_update_grad((data + ((1.0 / (1.0 + std::exp(-m_prev[0]->data))) * (1.0 + data))) * grad);
         break;
     default:
         break;

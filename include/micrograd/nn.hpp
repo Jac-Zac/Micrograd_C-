@@ -125,6 +125,7 @@ template <typename T> Value<T> Neuron<T>::operator()(Value_Vec<T> &x) {
 
     // return the activated value
     /* return m_weighted_sum->tanh(); */
+    /* return m_weighted_sum->swish(); */
     // Use relu to test
     return m_weighted_sum->relu();
 }

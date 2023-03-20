@@ -27,21 +27,18 @@ int main() {
     std::cout << "\nThe network has: " << model.parameters().size()
               << " parameters\n\n";
 
-    std::vector<std::vector<Value_Vec<TYPE>>> ypred;
-    Value_Vec<TYPE> tmp_loss;
-
     double lr = 0.5;
 
     std::cout << "Starting Training\n";
     std::cout << "----------------------------\n\n";
 
     for (size_t j = 1; j <= 1000; j++) {
-        // Reset in case it is not the first loop
-        ypred.clear();
-        tmp_loss.clear();
+
+        std::vector<std::vector<Value_Vec<TYPE>>> ypred;
+        // Create a tmp variable that allows the full graph to be stored
+        Value_Vec<TYPE> tmp_loss;
 
         Value<TYPE> loss = Value<TYPE>(0.0, "loss");
-        // Create a tmp variable that allows the full graph to be stored
         // Problem is with the ^ operator
 
         // Zero grad
@@ -75,12 +72,12 @@ int main() {
         for (Value<TYPE>* p : model.parameters()) {
             // Update parameter value
             /* p->data += -lr * (p->grad); */
-            p->data += -0.05 * (p->grad);
+            p->data += -0.01 * (p->grad);
         }
 
         std::cout << "The loss at step: " << j << " is: " << loss.data << '\n';
-        if (j == 100){
-            loss.draw_graph();
+        if (j == 500){
+            /* loss.draw_graph(); */
             break;
         }
     }
