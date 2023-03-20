@@ -15,7 +15,7 @@ template <typename T> T random_uniform(T range_from, T range_to) {
     std::mt19937 generator(rand_dev());
     std::uniform_real_distribution<T> distr(range_from, range_to);
     /* return distr(generator); */
-    return 1.0;
+    return 0.1;
 }
 
 // THIS IS NOT THE MOST EFFICIENT IMPLEMENTATION BUT SAVES ALL THE INTERMEDIATE
@@ -102,7 +102,8 @@ public:
 template <typename T>
 Neuron<T>::Neuron(size_t number_of_neurons_input)
     : m_num_neurons_input(number_of_neurons_input),
-      m_bias(Value<T>(random_uniform(-1.0, 1.0), "bias")) {
+      /* m_bias(Value<T>(random_uniform(-1.0, 1.0), "bias")) { */
+      m_bias(Value<T>(0, "bias")) {
     for (size_t i = 0; i < m_num_neurons_input; i++) {
         m_weights.emplace_back(Value<T>(random_uniform(-1.0, 1.0), "weight"));
     }

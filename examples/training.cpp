@@ -35,7 +35,7 @@ int main() {
     std::cout << "Starting Training\n";
     std::cout << "----------------------------\n\n";
 
-    for (size_t j = 1; j <= 10000; j++) {
+    for (size_t j = 1; j <= 1000; j++) {
         // Reset in case it is not the first loop
         ypred.clear();
         tmp_loss.clear();
@@ -78,8 +78,10 @@ int main() {
             p->data += -0.01 * (p->grad);
         }
 
-        /* std::cout << "The loss at step: " << j << " is: " << loss.data << '\n'; */
-        loss.draw_graph();
-        if (j == 1) break;
+        std::cout << "The loss at step: " << j << " is: " << loss.data << '\n';
+        if (j == 100){
+            loss.draw_graph();
+            break;
+        }
     }
 }
