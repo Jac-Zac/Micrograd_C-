@@ -111,6 +111,7 @@ Neuron<T>::Neuron(size_t number_of_neurons_input)
 template <typename T> Value<T> Neuron<T>::operator()(Value_Vec<T> &x) {
 
     // Save the result on the heap to use it later when I need it
+    /* auto m_weighted_sum = new Value<T>(0.0); */
     auto m_weighted_sum = new Value<T>(0.0);
 
     // Sum over all multiplies
@@ -135,6 +136,8 @@ template <typename T> std::vector<Value<T> *> Neuron<T>::parameters() {
         // Add the weights
         params.push_back(&w);
     }
+
+    std::cout << "I'm adding this: " << &m_bias << " which contains this: " << m_bias << '\n';
     // Add the biases
     params.push_back(&m_bias);
     return params;
