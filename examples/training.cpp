@@ -77,7 +77,6 @@ int main() {
             // Update parameter value
             /* p->data += -lr * (p->grad); */
             p->data += -0.01 * (p->grad);
-            /* std::cout << *p << '\n'; */
         }
 
         /* std::cout << "The loss at step: " << j << " is: " << loss.data << '\n'; */

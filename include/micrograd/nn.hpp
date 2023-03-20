@@ -124,7 +124,7 @@ template <typename T> Value<T> Neuron<T>::operator()(Value_Vec<T> &x) {
 
     // return the activated value
     /* return m_weighted_sum->tanh(); */
-    // Use relue to test
+    // Use relu to test
     return m_weighted_sum->relu();
 }
 
@@ -137,7 +137,6 @@ template <typename T> std::vector<Value<T> *> Neuron<T>::parameters() {
         params.push_back(&w);
     }
 
-    std::cout << "I'm adding this: " << &m_bias << " which contains this: " << m_bias << '\n';
     // Add the biases
     params.push_back(&m_bias);
     return params;
