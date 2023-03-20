@@ -40,7 +40,7 @@ int main() {
         ypred.clear();
         tmp_loss.clear();
 
-        auto loss = Value<TYPE>(0, "loss");
+        Value<TYPE> loss = Value<TYPE>(0.0, "loss");
         // Create a tmp variable that allows the full graph to be stored
         // Problem is with the ^ operator
 
@@ -58,7 +58,7 @@ int main() {
         // I have to compute this outside to allow the gradient to propagate
         // correctly
         for (size_t i = 0; i < BATCH; i++) {
-            loss += tmp_loss[i] ^ 2;
+            loss += tmp_loss[i] ^ 2.0;
         }
 
         // backward pass
@@ -72,10 +72,10 @@ int main() {
         }
 
         // Update parameters thanks to the gradient
-        for (auto &p : model.parameters()) {
+        for (Value<TYPE>* p : model.parameters()) {
             // Update parameter value
             /* p->data += -lr * (p->grad); */
-            p->data += -0.01 * (p->grad);
+            p->data += -0.05 * (p->grad);
         }
 
         std::cout << "The loss at step: " << j << " is: " << loss.data << '\n';

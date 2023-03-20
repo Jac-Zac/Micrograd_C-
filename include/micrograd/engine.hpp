@@ -35,7 +35,7 @@ public:
     T grad;            // gradient which by default is zero
 
     /* protected: */
-public:
+protected:
     char m_op;
     std::array<Value<T> *, 2> m_prev; // previous values
     std::vector<Value<T> *>
@@ -128,7 +128,7 @@ template <typename T> Value<T> Value<T>::inverse_value() {
 }
 
 template <typename T> Value<T> Value<T>::exp_value() {
-    return Value<T>(exp(data), "", EXP, {this, nullptr});
+    return Value<T>(std::exp(data), "", EXP, {this, nullptr});
 }
 
 template <typename T> Value<T> Value<T>::tanh() {
@@ -136,7 +136,7 @@ template <typename T> Value<T> Value<T>::tanh() {
 }
 
 template <typename T> Value<T> Value<T>::relu() {
-    return Value<T>(data < 0 ? 0 : data, "", RELU, {this, nullptr});
+    return Value<T>(data < 0.0 ? 0.0 : data, "", RELU, {this, nullptr});
 }
 
 template <typename T> void Value<T>::_backward_single() {
@@ -159,27 +159,27 @@ template <typename T> void Value<T>::_backward_single() {
         break;
     case DIV:
         m_prev[0]->_update_grad((1 / (m_prev[1]->data)) * grad);
-        m_prev[1]->_update_grad(-(m_prev[0]->data) / pow(m_prev[1]->data, 2) *
+        m_prev[1]->_update_grad(-(m_prev[0]->data) / std::pow(m_prev[1]->data, 2) *
                                 grad);
         break;
     case POW:
         m_prev[0]->_update_grad(
-            (m_prev[1]->data * pow(m_prev[0]->data, (m_prev[1]->data - 1))) *
+            (m_prev[1]->data * std::pow(m_prev[0]->data, (m_prev[1]->data - 1))) *
             grad);
         break;
     case INV:
         // e^x is e^x which I already saved in data
-        m_prev[0]->_update_grad(-1 / pow(m_prev[0]->data, 2) * grad);
+        m_prev[0]->_update_grad(-1 / std::pow(m_prev[0]->data, 2.0) * grad);
         break;
     case EXP:
         // e^x is e^x which I already saved in data
         m_prev[0]->_update_grad(data * grad);
         break;
     case TANH:
-        m_prev[0]->_update_grad((1 - pow(data, 2)) * grad);
+        m_prev[0]->_update_grad((1 - std::pow(data, 2)) * grad);
         break;
     case RELU:
-        m_prev[0]->_update_grad(data > 0 ? (1 * grad) : 0);
+        m_prev[0]->_update_grad(data > 0.0 ? (1.0 * grad) : 0.0);
         break;
     default:
         break;

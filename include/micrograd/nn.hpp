@@ -103,7 +103,7 @@ template <typename T>
 Neuron<T>::Neuron(size_t number_of_neurons_input)
     : m_num_neurons_input(number_of_neurons_input),
       /* m_bias(Value<T>(random_uniform(-1.0, 1.0), "bias")) { */
-      m_bias(Value<T>(0, "bias")) {
+      m_bias(Value<T>(0.0, "bias")) {
     for (size_t i = 0; i < m_num_neurons_input; i++) {
         m_weights.emplace_back(Value<T>(random_uniform(-1.0, 1.0), "weight"));
     }
