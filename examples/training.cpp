@@ -75,8 +75,12 @@ int main() {
             p->data += -0.01 * (p->grad);
         }
 
+        for (Value<TYPE>* p : model.parameters()) {
+            std::cout << *p << '\n';
+        }
+
         std::cout << "The loss at step: " << j << " is: " << loss.data << '\n';
-        if (j == 500){
+        if (j == 2){
             /* loss.draw_graph(); */
             break;
         }

@@ -14,6 +14,7 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
+#include <iomanip>
 
 enum ops_type : char {
     SUM = '+',
@@ -101,6 +102,8 @@ public:
 
     // << operator overload
     friend std::ostream &operator<<(std::ostream &os, const Value<T> &v) {
+        os << std::fixed;
+        os << std::setprecision(16);
         os << "Value(data=" << v.data << ", grad=" << v.grad
            << ", label=" << v.label << ")";
         return os;
