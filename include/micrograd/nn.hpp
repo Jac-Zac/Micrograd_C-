@@ -39,6 +39,7 @@ public:
 template <typename T> class Neuron : public Module<T> {
 public:
     Neuron(size_t num_neurons_input);
+    virtual ~Neuron(){};
 
     // Call operator: w * x + b dot product
     Value<T> operator()(Value_Vec<T> &x);
@@ -59,6 +60,7 @@ public:
 template <typename T> class Layer : public Module<T> {
 public:
     Layer(size_t num_neurons_input, size_t num_neurons_out);
+    virtual ~Layer(){};
 
     // Call operator: forward for every neuron in the layer
     Value_Vec<T> operator()(Value_Vec<T> &x);
@@ -76,6 +78,7 @@ protected:
 template <typename T, size_t N> class MLP : public Module<T> {
 public:
     MLP(size_t num_neurons_input, std::array<size_t, N> num_neurons_out);
+    virtual ~MLP(){};
 
     // Call operator: w * x + b dot product
     Value_Vec<T> operator()(Value_Vec<T> &x);
@@ -93,7 +96,7 @@ public:
     const size_t m_num_neurons_in;
     // N layers of the N + 1 total have outputs
     const std::array<size_t, N> m_num_neurons_out;
-    std::vector<Ptr_Value_Vec<T>> m_layers_output;
+    std::array<Ptr_Value_Vec<T>,N + 1> m_layers_output;
 };
 
 //  ================ Implementation  Neuron =================
@@ -108,13 +111,14 @@ Neuron<T>::Neuron(size_t number_of_neurons_input)
     }
 }
 
-// This can perhaps just take an in input std::vector<T> and not a vector of values
+// This can perhaps just take an in input std::vector<T> and not a vector of
+// values
 template <typename T> Value<T> Neuron<T>::operator()(Value_Vec<T> &x) {
 
     m_weighted_sum.push_back(std::make_shared<Value<T>>(0.0));
 
-        // Sum over all multiplies
-        for (size_t i = 0; i < m_num_neurons_input; i++) {
+    // Sum over all multiplies
+    for (size_t i = 0; i < m_num_neurons_input; i++) {
         // -> doesn't work and I do not know why
         *m_weighted_sum.back() += m_weights[i] * x[i];
     }
@@ -197,11 +201,12 @@ template <typename T, size_t N>
 Value_Vec<T> MLP<T, N>::operator()(Value_Vec<T> &x) {
 
     /* std::array<Value_Vec<T>, N + 1> layer_output; */
-    m_layers_output.emplace_back(std::make_shared<Value_Vec<T>>(x));
+    m_layers_output[0] = std::make_shared<Value_Vec<T>>(x);
     /* m_layers_output.reserve(N + 1); */
 
     for (size_t i = 1; i <= N; i++) {
-        m_layers_output.emplace_back(std::make_shared<Value_Vec<T>>(m_layers[i - 1](*m_layers_output[i - 1])));
+        m_layers_output[i] = std::make_shared<Value_Vec<T>>(
+            m_layers[i - 1](*m_layers_output[i - 1]));
     }
 
     // return the value of the last element which is a vector

@@ -50,8 +50,8 @@ public:
     // Constructor
     Value(T data, std::string label = "", char op = ' ',
           std::array<Value<T> *, 2> children = {nullptr, nullptr})
-        : data(data), label(label), m_op(op), m_prev(std::move(children)),
-          grad(0.0) {}
+        : label(label), data(data), grad(0.0), m_op(op),
+          m_prev(std::move(children)) {}
 
     // Operator Overloading
     // lvalues and rvalues because of const reference

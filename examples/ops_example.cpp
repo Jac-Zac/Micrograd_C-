@@ -1,5 +1,7 @@
 #include <micrograd/engine.hpp>
 
+using namespace value_engine;
+
 int main() {
     // Testing
     auto a = Value<double>(-4.0, "a");
