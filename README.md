@@ -66,3 +66,5 @@ int main() {
 - Optimization breaks things
 
 - Potentially compute for the entire batch and then compute the loss I think it store less computations
+
+- There is an error in the computation of the gradient

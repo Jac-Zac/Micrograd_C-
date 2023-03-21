@@ -3,7 +3,7 @@
 #define SIZE 3
 #define BATCH 4
 /* #define BATCH 4 */
-#define DATASET_SIZE 3 * 4
+/* #define DATASET_SIZE 3 * 4 */
 
 typedef double TYPE;
 
@@ -38,11 +38,11 @@ int main() {
 
 
     for (size_t j = 1; j <= 1000; j++) {
-        std::vector<Value_Vec<TYPE>> ypred;
-        // Create a tmp variable that allows the full graph to be stored
-        Value_Vec<TYPE> tmp_loss;
 
+        std::vector<Value_Vec<TYPE>> ypred;
+        Value_Vec<TYPE> tmp_loss;
         Value<TYPE> loss = Value<TYPE>(0.0, "loss");
+        auto tmp_exp = Value<TYPE>(2.0);
         // Problem is with the ^ operator
 
         // Zero grad
@@ -51,20 +51,17 @@ int main() {
         // Iterate over the elements of one batch
         for (size_t i = 0; i < BATCH; i++) {
             // Forward pass - target
-
-            loss += (model(xs[i])[0] - ys[i])^2.0;
-
-            /* ypred.emplace_back(model(xs[i])); */
-            /*  */
-            /* // Mean Squared Error tmp */
-            /* tmp_loss.emplace_back(ypred[i][0] - ys[i]); */
+            ypred.emplace_back(model(xs[i]));
+            // Mean Squared Error tmp
+            tmp_loss.emplace_back(ypred[i][0] - ys[i]);
         }
 
         // I have to compute this outside to allow the gradient to propagate
         // correctly
-        /* for (size_t i = 0; i < BATCH; i++) { */
-        /*     loss += tmp_loss[i]^2.0; */
-        /* } */
+        for (size_t i = 0; i < BATCH; i++) {
+            // Mean Squared Error
+            loss += tmp_loss[i];
+        }
 
         // backward pass
         loss.backward();
@@ -83,7 +80,7 @@ int main() {
             p->data += -0.01 * (p->grad);
         }
 
-        std::cout << "The loss at step: " << j << " is: " << loss.data << '\n';
+        std::cout << "The loss at step: " << j << " is: " << loss << '\n';
         if (j == 100) {
             /* for (Value<TYPE> *p : model.parameters()) { */
             /*     std::cout << *p << '\n'; */
