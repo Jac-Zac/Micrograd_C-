@@ -13,9 +13,9 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -O0")
 file(GLOB_RECURSE SOURCES
       micrograd/*.cpp
       micrograd/**/*.cpp
-      # examples/training.cpp
+      examples/training.cpp
       # examples/ops_example.cpp
-      examples/neural_net.cpp
+      # examples/neural_net.cpp
 )
 
 add_library(micrograd INTERFACE)

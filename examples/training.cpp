@@ -1,7 +1,7 @@
 #include <micrograd/nn.hpp>
 
 #define SIZE 3
-#define BATCH 4
+#define BATCH 1
 /* #define BATCH 4 */
 #define DATASET_SIZE 3 * 4
 
