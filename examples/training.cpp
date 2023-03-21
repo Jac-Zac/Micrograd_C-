@@ -1,7 +1,5 @@
 #include <micrograd/nn.hpp>
 
-using namespace nn;
-
 #define SIZE 3
 #define BATCH 4
 /* #define BATCH 4 */
@@ -17,8 +15,13 @@ int main() {
     auto model = MLP<TYPE, SIZE>(3, n_neurons_for_layer);
 
     // Create a vector for the input and view it as a (3, 4)
-    Value_Vec_Ptr<TYPE> xs = std::make_shared<Value_Vec>(
-        {2.0, 3.0, -1.0, 3.0, -1.0, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, -1.0});
+    std::vector<Value_Vec<TYPE>> xs = {
+        {2.0, 3.0, -1.0}, {3.0, -1.0, 0.5}, {0.5, 1.0, 1.0}, {1.0, 1.0, -1.0}};
+    /* Value_Vec_Ptr<TYPE> xs = std::make_shared<TYPE>( */
+    /*         2.0, 3.0, -1.0, */
+    /*         3.0, -1.0, 0.5, */
+    /*         0.5, 1.0, 1.0, */
+    /*         1.0, 1.0, -1.0); */
 
     // desired target
     Value_Vec<TYPE> ys = {1.0, -1.0, -1.0, 1.0};
@@ -35,7 +38,7 @@ int main() {
 
     for (size_t j = 1; j <= 1000; j++) {
 
-        std::vector<std::vector<Value_Vec<TYPE>>> ypred;
+        std::vector<Value_Vec<TYPE>> ypred;
         // Create a tmp variable that allows the full graph to be stored
         Value_Vec<TYPE> tmp_loss;
 
@@ -46,12 +49,12 @@ int main() {
         model.zero_grad();
 
         // Iterate over the elements of one batch
-        for (size_t i = 0; i < xs.size(); i += BATCH) {
+        for (size_t i = 0; i < BATCH; i ++) {
             // Forward pass - target
             ypred.emplace_back(model(xs[i]));
 
             // Mean Squared Error tmp
-            tmp_loss.emplace_back(ypred[i][SIZE][0] - ys[i]);
+            tmp_loss.emplace_back(ypred[i][0] - ys[i]);
         }
 
         // I have to compute this outside to allow the gradient to propagate

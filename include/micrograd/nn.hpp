@@ -29,11 +29,15 @@ public:
         for (auto &p : parameters()) {
             p->grad = 0.0;
         }
-
-        // I think I should clear the m_weighted_sum hear
+        m_weighted_sums.clear();
+        m_layers_output.clear();
     }
     // Make it virtual so that it can be override
     virtual std::vector<Value<T> *> parameters() { return {}; }
+
+protected:
+    Value_Vec_Ptr<T> m_weighted_sums;
+    std::vector<Ptr_Value_Vec<T>> m_layers_output;
 };
 
 template <typename T> class Neuron : public Module<T> {
@@ -42,17 +46,17 @@ public:
     virtual ~Neuron(){};
 
     // Call operator: w * x + b dot product
-    Value<T> operator()(Value_Vec<T> &x);
+    Value<T> operator()(const Value_Vec<T> &x);
 
     // Overriding
     virtual std::vector<Value<T> *> parameters() override;
 
-public:
+protected:
     size_t m_num_neurons_input;
     std::vector<Value<T>> m_weights;
     // I'm not propagating the gradient to the bias
     Value<T> m_bias;
-    Value_Vec_Ptr<T> m_weighted_sum;
+    using Module<T>::m_weighted_sums; // bring m_weighted_sums into the scope of Neuron
 };
 
 // ---------------------------------------------------------
@@ -63,7 +67,7 @@ public:
     virtual ~Layer(){};
 
     // Call operator: forward for every neuron in the layer
-    Value_Vec<T> operator()(Value_Vec<T> &x);
+    Value_Vec<T> operator()(const Value_Vec<T> &x);
 
     // Overriding
     virtual std::vector<Value<T> *> parameters() override;
@@ -81,10 +85,18 @@ public:
     virtual ~MLP(){};
 
     // Call operator: w * x + b dot product
-    Value_Vec<T> operator()(Value_Vec<T> &x);
+    Value_Vec<T> operator()(const Value_Vec<T> &x);
 
-    // << operator overload to get the structure of the network
-    std::ostream &operator<<(std::ostream &os);
+    // Declare the operator<< function as a friend function and get the structure of the network
+    friend std::ostream &operator<<(std::ostream &os, const MLP<T, N> &mlp) {
+        os << "Network of " << N + 1 << " Layers: [ " << mlp.m_num_neurons_in;
+        for (size_t i = 0; i < N; i++) {
+            os << " , " << mlp.m_num_neurons_out[i];
+        }
+        os << " ]\n";
+        return os;
+    }
+
     // Overriding
     virtual std::vector<Value<T> *> parameters() override;
 
@@ -92,11 +104,11 @@ public:
     std::vector<Layer<T>> m_layers;
     size_t m_net_size;
     // Layer given in output
-public:
+protected:
     const size_t m_num_neurons_in;
     // N layers of the N + 1 total have outputs
     const std::array<size_t, N> m_num_neurons_out;
-    std::array<Ptr_Value_Vec<T>,N + 1> m_layers_output;
+    using Module<T>::m_layers_output; // bring m_layers_output into the scope of Neuron
 };
 
 //  ================ Implementation  Neuron =================
@@ -113,21 +125,21 @@ Neuron<T>::Neuron(size_t number_of_neurons_input)
 
 // This can perhaps just take an in input std::vector<T> and not a vector of
 // values
-template <typename T> Value<T> Neuron<T>::operator()(Value_Vec<T> &x) {
+template <typename T> Value<T> Neuron<T>::operator()(const Value_Vec<T> &x) {
 
-    m_weighted_sum.push_back(std::make_shared<Value<T>>(0.0));
+    m_weighted_sums.push_back(std::make_shared<Value<T>>(0.0));
 
     // Sum over all multiplies
     for (size_t i = 0; i < m_num_neurons_input; i++) {
         // -> doesn't work and I do not know why
-        *m_weighted_sum.back() += m_weights[i] * x[i];
+        *m_weighted_sums.back() += m_weights[i] * x[i];
     }
 
     // Add the bias
-    *m_weighted_sum.back() += m_bias;
+    *m_weighted_sums.back() += m_bias;
 
     // return the activated value
-    return m_weighted_sum.back()->relu();
+    return m_weighted_sums.back()->relu();
 }
 
 template <typename T> std::vector<Value<T> *> Neuron<T>::parameters() {
@@ -154,7 +166,7 @@ Layer<T>::Layer(size_t num_neurons_input, size_t num_neurons_output) {
     }
 }
 
-template <typename T> Value_Vec<T> Layer<T>::operator()(Value_Vec<T> &x) {
+template <typename T> Value_Vec<T> Layer<T>::operator()(const Value_Vec<T> &x) {
 
     // Create a vector of Value objects to return
     Value_Vec<T> m_neurons_output;
@@ -198,15 +210,14 @@ MLP<T, N>::MLP(size_t num_neurons_input,
 }
 
 template <typename T, size_t N>
-Value_Vec<T> MLP<T, N>::operator()(Value_Vec<T> &x) {
+Value_Vec<T> MLP<T, N>::operator()(const Value_Vec<T> &x) {
 
-    /* std::array<Value_Vec<T>, N + 1> layer_output; */
-    m_layers_output[0] = std::make_shared<Value_Vec<T>>(x);
+    m_layers_output.emplace_back(std::make_shared<Value_Vec<T>>(x));
     /* m_layers_output.reserve(N + 1); */
 
     for (size_t i = 1; i <= N; i++) {
-        m_layers_output[i] = std::make_shared<Value_Vec<T>>(
-            m_layers[i - 1](*m_layers_output[i - 1]));
+        m_layers_output.emplace_back(std::make_shared<Value_Vec<T>>(
+            m_layers[i - 1](*m_layers_output[i - 1])));
     }
 
     // return the value of the last element which is a vector
@@ -214,7 +225,7 @@ Value_Vec<T> MLP<T, N>::operator()(Value_Vec<T> &x) {
 }
 
 template <typename T, size_t N>
-std::vector<Value<T> *> MLP<T, N>::parameters() {
+std::vector<Value<T> *> MLP<T, N>::parameters(){
     std::vector<Value<T> *> params;
     // Iterate over all the layers
     for (auto &layer : m_layers) {
@@ -223,17 +234,4 @@ std::vector<Value<T> *> MLP<T, N>::parameters() {
         params.insert(params.end(), layer_params.begin(), layer_params.end());
     }
     return params;
-}
-
-// Overloading for the output to standard out ---------------------------
-
-template <typename T, size_t N>
-std::ostream &operator<<(std::ostream &os, MLP<T, N> &mlp) {
-    os << "Network of " << N + 1 << " Layers: [ " << mlp.m_num_neurons_in;
-    for (size_t i = 0; i < N; i++) {
-        os << " , " << mlp.m_num_neurons_out[i];
-    }
-    os << " ]\n";
-    os << "Number of parameters: " << mlp.parameters().size() << '\n';
-    return os;
 }
