@@ -1,7 +1,7 @@
 #include <micrograd/nn.hpp>
 
 #define SIZE 3
-#define BATCH 1
+#define BATCH 4
 /* #define BATCH 4 */
 #define DATASET_SIZE 3 * 4
 
@@ -36,8 +36,8 @@ int main() {
     std::cout << "Starting Training\n";
     std::cout << "----------------------------\n\n";
 
-    for (size_t j = 1; j <= 1000; j++) {
 
+    for (size_t j = 1; j <= 1000; j++) {
         std::vector<Value_Vec<TYPE>> ypred;
         // Create a tmp variable that allows the full graph to be stored
         Value_Vec<TYPE> tmp_loss;
@@ -49,19 +49,22 @@ int main() {
         model.zero_grad();
 
         // Iterate over the elements of one batch
-        for (size_t i = 0; i < BATCH; i ++) {
+        for (size_t i = 0; i < BATCH; i++) {
             // Forward pass - target
-            ypred.emplace_back(model(xs[i]));
 
-            // Mean Squared Error tmp
-            tmp_loss.emplace_back(ypred[i][0] - ys[i]);
+            loss += (model(xs[i])[0] - ys[i])^2.0;
+
+            /* ypred.emplace_back(model(xs[i])); */
+            /*  */
+            /* // Mean Squared Error tmp */
+            /* tmp_loss.emplace_back(ypred[i][0] - ys[i]); */
         }
 
         // I have to compute this outside to allow the gradient to propagate
         // correctly
-        for (size_t i = 0; i < BATCH; i++) {
-            loss += tmp_loss[i] ^ 2.0;
-        }
+        /* for (size_t i = 0; i < BATCH; i++) { */
+        /*     loss += tmp_loss[i]^2.0; */
+        /* } */
 
         // backward pass
         loss.backward();
@@ -82,9 +85,9 @@ int main() {
 
         std::cout << "The loss at step: " << j << " is: " << loss.data << '\n';
         if (j == 100) {
-            for (Value<TYPE> *p : model.parameters()) {
-                std::cout << *p << '\n';
-            }
+            /* for (Value<TYPE> *p : model.parameters()) { */
+            /*     std::cout << *p << '\n'; */
+            /* } */
             loss.draw_graph();
             break;
         }

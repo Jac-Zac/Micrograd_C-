@@ -8,7 +8,7 @@
 
 #include "engine.hpp"
 #include <random>
-#include <variant>
+/* #include <variant> */
 
 using namespace value_engine;
 
@@ -212,12 +212,11 @@ MLP<T, N>::MLP(size_t num_neurons_input,
 template <typename T, size_t N>
 Value_Vec<T> MLP<T, N>::operator()(const Value_Vec<T> &x) {
 
-    m_layers_output.emplace_back(std::make_shared<Value_Vec<T>>(x));
-    /* m_layers_output.reserve(N + 1); */
+    m_layers_output.push_back(std::make_shared<Value_Vec<T>>(x));
 
     for (size_t i = 1; i <= N; i++) {
         m_layers_output.emplace_back(std::make_shared<Value_Vec<T>>(
-            m_layers[i - 1](*m_layers_output[i - 1])));
+            m_layers[i- 1](*m_layers_output.back())));
     }
 
     // return the value of the last element which is a vector
