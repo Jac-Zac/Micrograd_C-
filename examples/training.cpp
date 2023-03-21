@@ -60,7 +60,7 @@ int main() {
         // correctly
         for (size_t i = 0; i < BATCH; i++) {
             // Mean Squared Error
-            loss += tmp_loss[i];
+            loss += tmp_loss[i]^2.0;
         }
 
         // backward pass
@@ -76,17 +76,17 @@ int main() {
         // Update parameters thanks to the gradient
         for (Value<TYPE> *p : model.parameters()) {
             // Update parameter value
-            /* p->data += -lr * (p->grad); */
-            p->data += -0.01 * (p->grad);
+            p->data += -lr * (p->grad);
+            /* p->data += -0.1 * (p->grad); */
         }
 
         std::cout << "The loss at step: " << j << " is: " << loss << '\n';
-        if (j == 100) {
+        /* if (j == 2) { */
             /* for (Value<TYPE> *p : model.parameters()) { */
             /*     std::cout << *p << '\n'; */
             /* } */
-            loss.draw_graph();
-            break;
-        }
+        /*     loss.draw_graph(); */
+        /*     break; */
+        /* } */
     }
 }
