@@ -16,8 +16,11 @@
 #include <vector>
 #include <iomanip>
 
+
+namespace value_engine {
+
 enum ops_type : char {
-    SUM = '+',
+    ADD = '+',
     DIF = '-',
     MUL = '*',
     DIV = '/',
@@ -54,7 +57,7 @@ public:
     // Operator Overloading
     // lvalues and rvalues because of const reference
     friend Value operator+(const Value &lhs, const Value &rhs) {
-        return Value(lhs.data + rhs.data, "", SUM,
+        return Value(lhs.data + rhs.data, "", ADD,
                      {const_cast<Value *>(&lhs), const_cast<Value *>(&rhs)});
     }
 
@@ -128,6 +131,12 @@ protected:
     void _update_grad(T grad) { this->grad += grad; }
 };
 
+
+// Adding aliases
+template <typename T> using Value_Vec = std::vector<Value<T>>;
+template <typename T> using Value_Vec_Ptr = std::shared_ptr<std::vector<Value<T>>>;
+template <typename T> using Ptr_Value_Vec = std::shared_ptr<std::vector<Value<T>>>;
+
 // ==================== Implementation =====================
 
 template <typename T> Value<T> Value<T>::inverse_value() {
@@ -158,7 +167,7 @@ template <typename T> Value<T> Value<T>::swish() {
 
 template <typename T> void Value<T>::_backward_single() {
     switch (this->m_op) {
-    case SUM:
+    case ADD:
         // Should just move the gradient along to both of them
         // += because we want to avoid bugs if we reuse a variable
         m_prev[0]->_update_grad(this->grad);
@@ -288,4 +297,5 @@ template <typename T> void Value<T>::draw_graph() {
     std::system("dot -Tsvg graph.dot -o graph.svg");
     // Open the graph using the default viewer
     std::system("open graph.svg");
+}
 }

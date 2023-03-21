@@ -10,7 +10,9 @@ set(CMAKE_CXX_FLAGS "-O0")
 file(GLOB_RECURSE SOURCES
       micrograd/*.cpp
       micrograd/**/*.cpp
-      examples/training.cpp
+      # examples/training.cpp
+      # examples/ops_example.cpp
+      examples/neuron.cpp
 )
 
 add_library(micrograd INTERFACE)

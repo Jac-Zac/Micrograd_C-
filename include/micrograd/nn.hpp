@@ -10,22 +10,15 @@
 #include <random>
 #include <variant>
 
+using namespace value_engine;
+
 template <typename T> T random_uniform(T range_from, T range_to) {
     std::random_device rand_dev;
     std::mt19937 generator(rand_dev());
     std::uniform_real_distribution<T> distr(range_from, range_to);
     /* return distr(generator); */
-    return 0.1;
+    return 0.2;
 }
-
-// THIS IS NOT THE MOST EFFICIENT IMPLEMENTATION BUT SAVES ALL THE INTERMEDIATE
-// STATES TO DRAW THE GRAPH
-
-// I have to propagate the gradient trough the bias
-
-namespace nn {
-
-template <typename T> using Value_Vec = std::vector<Value<T>>;
 
 // ---------------------------------------------------------
 
@@ -46,7 +39,8 @@ public:
     Neuron(size_t num_neurons_input);
 
     // Call operator: w * x + b dot product
-    Value<T> operator()(Value_Vec<T> &x);
+    std::shared_ptr<Value<T>> operator()(Ptr_Value_Vec<T> x);
+
     // Overriding
     virtual std::vector<Value<T> *> parameters() override;
 
@@ -64,7 +58,8 @@ public:
     Layer(size_t num_neurons_input, size_t num_neurons_out);
 
     // Call operator: forward for every neuron in the layer
-    Value_Vec<T> operator()(Value_Vec<T> &x);
+    Value_Vec_Ptr<T> operator()(Ptr_Value_Vec<T> x);
+
     // Overriding
     virtual std::vector<Value<T> *> parameters() override;
 
@@ -80,7 +75,7 @@ public:
     MLP(size_t num_neurons_input, std::array<size_t, N> num_neurons_out);
 
     // Call operator: w * x + b dot product
-    std::vector<Value_Vec<T>> operator()(Value_Vec<T> &x);
+    Value_Vec_Ptr<T> operator()(Value_Vec<T> &x);
 
     // << operator overload to get the structure of the network
     std::ostream &operator<<(std::ostream &os);
@@ -103,31 +98,27 @@ template <typename T>
 Neuron<T>::Neuron(size_t number_of_neurons_input)
     : m_num_neurons_input(number_of_neurons_input),
       /* m_bias(Value<T>(random_uniform(-1.0, 1.0), "bias")) { */
-      m_bias(Value<T>(0.0, "bias")) {
+      m_bias(Value<T>(0.1, "bias")) {
     for (size_t i = 0; i < m_num_neurons_input; i++) {
         m_weights.emplace_back(Value<T>(random_uniform(-1.0, 1.0), "weight"));
     }
 }
 
-template <typename T> Value<T> Neuron<T>::operator()(Value_Vec<T> &x) {
+template <typename T>
+std::shared_ptr<Value<T>> Neuron<T>::operator()(Ptr_Value_Vec<T> x) {
 
-    // Save the result on the heap to use it later when I need it
-    /* auto m_weighted_sum = new Value<T>(0.0); */
     auto m_weighted_sum = new Value<T>(0.0);
 
     // Sum over all multiplies
     for (size_t i = 0; i < m_num_neurons_input; i++) {
-        *m_weighted_sum += m_weights[i] * x[i];
+        *m_weighted_sum += m_weights[i] * (*x)[i];
     }
 
     // Add the bias
     *m_weighted_sum += m_bias;
 
     // return the activated value
-    /* return m_weighted_sum->tanh(); */
-    /* return m_weighted_sum->swish(); */
-    // Use relu to test
-    return m_weighted_sum->relu();
+    return std::make_shared<Value<T>>(m_weighted_sum->relu());
 }
 
 template <typename T> std::vector<Value<T> *> Neuron<T>::parameters() {
@@ -155,11 +146,12 @@ Layer<T>::Layer(size_t num_neurons_input, size_t num_neurons_output) {
 }
 
 template <typename T>
-std::vector<Value<T>> Layer<T>::operator()(Value_Vec<T> &x) {
-    // Create an array of neurons to return
-    Value_Vec<T> m_neurons_output;
+Value_Vec_Ptr<T> Layer<T>::operator()(Ptr_Value_Vec<T> x) {
 
-    // Iterate over the m_neurons
+    // Create a vector of shared_ptrs to Value objects to return
+    std::vector<std::shared_ptr<Value<T>>> m_neurons_output;
+
+    // Iterate over the neurons and push back a shared_ptr to the result of calling each neuron
     for (auto &neuron : m_neurons) {
         m_neurons_output.emplace_back(neuron(x));
     }
@@ -198,9 +190,9 @@ MLP<T, N>::MLP(size_t num_neurons_input,
 }
 
 template <typename T, size_t N>
-std::vector<Value_Vec<T>> MLP<T, N>::operator()(Value_Vec<T> &x) {
+Value_Vec_Ptr<T> MLP<T, N>::operator()(Value_Vec<T> &x) {
 
-    std::vector<Value_Vec<T>> layer_output;
+    std::vector<Value_Vec_Ptr<T>> layer_output;
 
     layer_output.emplace_back(x);
 
@@ -235,4 +227,3 @@ std::ostream &operator<<(std::ostream &os, MLP<T, N> &mlp) {
     os << "Number of parameters: " << mlp.parameters().size()<< '\n';
     return os;
 }
-} // namespace nn

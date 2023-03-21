@@ -5,7 +5,7 @@ using namespace nn;
 #define SIZE 3
 #define BATCH 4
 /* #define BATCH 4 */
-#define DATASET_SIZE 4
+#define DATASET_SIZE 3*4
 
 typedef double TYPE;
 
@@ -16,8 +16,13 @@ int main() {
     std::array<size_t, SIZE> n_neurons_for_layer = {4, 4, 1};
     auto model = MLP<TYPE, SIZE>(3, n_neurons_for_layer);
 
-    std::vector<Value_Vec<TYPE>> xs = {
-        {2.0, 3.0, -1.0}, {3.0, -1.0, 0.5}, {0.5, 1.0, 1.0}, {1.0, 1.0, -1.0}};
+    // Create a vector for the input and view it as a (3, 4)
+    Value_Vec_Ptr<TYPE> xs = std::make_shared<Value_Vec>({
+        2.0, 3.0, -1.0,
+        3.0, -1.0, 0.5,
+        0.5, 1.0, 1.0,
+        1.0, 1.0, -1.0
+    });
 
     // desired target
     Value_Vec<TYPE> ys = {1.0, -1.0, -1.0, 1.0};
@@ -44,7 +49,8 @@ int main() {
         // Zero grad
         model.zero_grad();
 
-        for (size_t i = 0; i < BATCH; i++) {
+        // Iterate over the elements of one batch
+        for (size_t i = 0; i < xs.size() ; i+=BATCH) {
             // Forward pass - target
             ypred.emplace_back(model(xs[i]));
 
@@ -75,13 +81,13 @@ int main() {
             p->data += -0.01 * (p->grad);
         }
 
-        for (Value<TYPE>* p : model.parameters()) {
-            std::cout << *p << '\n';
-        }
 
         std::cout << "The loss at step: " << j << " is: " << loss.data << '\n';
-        if (j == 2){
-            /* loss.draw_graph(); */
+        if (j == 100){
+            for (Value<TYPE>* p : model.parameters()) {
+                std::cout << *p << '\n';
+            }
+            loss.draw_graph();
             break;
         }
     }
