@@ -78,7 +78,7 @@ public:
     MLP(size_t num_neurons_input, std::array<size_t, N> num_neurons_out);
 
     // Call operator: w * x + b dot product
-    std::vector<Value_Vec<T>> operator()(Value_Vec<T> &x);
+    Value_Vec<T> operator()(Value_Vec<T> &x);
 
     // << operator overload to get the structure of the network
     std::ostream &operator<<(std::ostream &os);
@@ -93,6 +93,7 @@ public:
     const size_t m_num_neurons_in;
     // N layers of the N + 1 total have outputs
     const std::array<size_t, N> m_num_neurons_out;
+    std::vector<Ptr_Value_Vec<T>> m_layers_output;
 };
 
 //  ================ Implementation  Neuron =================
@@ -193,17 +194,18 @@ MLP<T, N>::MLP(size_t num_neurons_input,
 }
 
 template <typename T, size_t N>
-std::vector<Value_Vec<T>> MLP<T, N>::operator()(Value_Vec<T> &x) {
+Value_Vec<T> MLP<T, N>::operator()(Value_Vec<T> &x) {
 
-    std::vector<Value_Vec<T>> layer_output;
-
-    layer_output.emplace_back(x);
+    /* std::array<Value_Vec<T>, N + 1> layer_output; */
+    m_layers_output.emplace_back(std::make_shared<Value_Vec<T>>(x));
+    /* m_layers_output.reserve(N + 1); */
 
     for (size_t i = 1; i <= N; i++) {
-        layer_output.emplace_back(m_layers[i - 1](layer_output[i - 1]));
+        m_layers_output.emplace_back(std::make_shared<Value_Vec<T>>(m_layers[i - 1](*m_layers_output[i - 1])));
     }
 
-    return layer_output;
+    // return the value of the last element which is a vector
+    return *(m_layers_output.back());
 }
 
 template <typename T, size_t N>

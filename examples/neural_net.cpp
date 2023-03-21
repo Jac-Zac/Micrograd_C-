@@ -17,11 +17,11 @@ int main() {
 
     // auto will be an std::variant
     /* std::vector<Value_Vec<double>> y = model(x); */
-    auto y = model(x);
+    Value_Vec<double> y = model(x);
 
     // We access the last of the of the output layers since it is 1 - N_TOTAL
     // which is perfect to access the vector 0 because we only have 1 neuron
-    y[N_OUTPUT_LAYERS][0].backward();
+    y[0].backward();
     /* model.zero_grad(); */
 
     for (auto &p : model.parameters()) {
@@ -31,9 +31,9 @@ int main() {
     std::cout << "Model information: " << model << "\n";
     std::cout << "Number of parameters: " << model.parameters().size() << "\n";
 
-    std::cout << "Output: " << y[N_OUTPUT_LAYERS][0] << "\n";
+    std::cout << "Output: " << y[0] << "\n";
 
-    y[N_OUTPUT_LAYERS][0].draw_graph();
+    y[0].draw_graph();
 
     return 0;
 }
