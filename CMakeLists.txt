@@ -12,7 +12,7 @@ file(GLOB_RECURSE SOURCES
       micrograd/**/*.cpp
       # examples/training.cpp
       # examples/ops_example.cpp
-      examples/neuron.cpp
+      examples/neural_net.cpp
 )
 
 add_library(micrograd INTERFACE)
