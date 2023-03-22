@@ -35,7 +35,7 @@ int main() {
     std::cout << "Starting Training\n";
     std::cout << "----------------------------\n\n";
 
-    double lr = 0.01;
+    double lr = 0.005;
 
     for (size_t j = 1; j <= 1000; j++) {
 
@@ -67,10 +67,10 @@ int main() {
         loss.backward();
 
         // Change the learning rate
-        if (j < 50) {
-            lr = 0.01;
+        if (j < 800) {
+            lr = 0.005;
         } else {
-            lr = 0.01;
+            lr = 0.001;
         }
 
         // Update parameters thanks to the gradient
@@ -79,7 +79,7 @@ int main() {
             p->data += -lr * (p->grad);
         }
 
-        if (j == 1000) {
+        if (j % 100 == 0) {
             std::cout << "The loss at step: " << j << " is: " << loss.data
                       << '\n';
         }
