@@ -17,6 +17,7 @@ template <typename T> T random_uniform(T range_from, T range_to) {
     std::mt19937 generator(rand_dev());
     std::uniform_real_distribution<T> distr(range_from, range_to);
     return distr(generator);
+    /* return 0.1; */
 }
 
 // ---------------------------------------------------------

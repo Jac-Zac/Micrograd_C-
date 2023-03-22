@@ -57,8 +57,6 @@ int main() {
 
 ### TODO
 
-- [ ] Try using shared pointers
+- [ ] Try using shared pointers even for the += to avoid memory leaks
 
 - [ ] Think of a better way to write the autograd engine. And also stack based topo_sort
-
-- Think about mini batches because when you mini batch you compute less accurate gradients for loss minimization but you can do it way faster and thus do way more step
