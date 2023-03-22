@@ -41,7 +41,7 @@ protected:
 
 template <typename T> class Neuron : public Module<T> {
 public:
-    Neuron(size_t num_neurons_input);
+    Neuron(size_t num_neurons_input, bool nonlin = true);
     virtual ~Neuron(){};
 
     // Call operator: w * x + b dot product
@@ -52,17 +52,19 @@ public:
 
 protected:
     size_t m_num_neurons_input;
+    bool m_nonlin;
     std::vector<Value<T>> m_weights;
     // I'm not propagating the gradient to the bias
     Value<T> m_bias;
-    using Module<T>::m_weighted_sums; // bring m_weighted_sums into the scope of Neuron
+    using Module<T>::m_weighted_sums; // bring m_weighted_sums into the scope of
+                                      // Neuron
 };
 
 // ---------------------------------------------------------
 
 template <typename T> class Layer : public Module<T> {
 public:
-    Layer(size_t num_neurons_input, size_t num_neurons_out);
+    Layer(size_t num_neurons_input, size_t num_neurons_out, bool nonlin = true);
     virtual ~Layer(){};
 
     // Call operator: forward for every neuron in the layer
@@ -86,7 +88,8 @@ public:
     // Call operator: w * x + b dot product
     Value_Vec<T> operator()(const Value_Vec<T> &x);
 
-    // Declare the operator<< function as a friend function and get the structure of the network
+    // Declare the operator<< function as a friend function and get the
+    // structure of the network
     friend std::ostream &operator<<(std::ostream &os, const MLP<T, N> &mlp) {
         os << "Network of " << N + 1 << " Layers: [ " << mlp.m_num_neurons_in;
         for (size_t i = 0; i < N; i++) {
@@ -107,14 +110,15 @@ protected:
     const size_t m_num_neurons_in;
     // N layers of the N + 1 total have outputs
     const std::array<size_t, N> m_num_neurons_out;
-    using Module<T>::m_layers_output; // bring m_layers_output into the scope of Neuron
+    using Module<T>::m_layers_output; // bring m_layers_output into the scope of
+                                      // Neuron
 };
 
 //  ================ Implementation  Neuron =================
 
 template <typename T>
-Neuron<T>::Neuron(size_t number_of_neurons_input)
-    : m_num_neurons_input(number_of_neurons_input),
+Neuron<T>::Neuron(size_t number_of_neurons_input, bool nonlin)
+    : m_num_neurons_input(number_of_neurons_input), m_nonlin(nonlin),
       /* m_bias(Value<T>(random_uniform(-1.0, 1.0), "bias")) { */
       m_bias(Value<T>(random_uniform(-1.0, 1.0), "bias")) {
     for (size_t i = 0; i < m_num_neurons_input; i++) {
@@ -138,33 +142,38 @@ template <typename T> Value<T> Neuron<T>::operator()(const Value_Vec<T> &x) {
     *m_weighted_sums.back() += m_bias;
 
     // return the activated value
-    /* return m_weighted_sums.back()->relu(); */
-    /* return m_weighted_sums.back()->lrelu(); */
-    /* return m_weighted_sums.back()->swish(); */
-    return m_weighted_sums.back()->tanh();
+    return m_nonlin ? m_weighted_sums.back()->relu() : *m_weighted_sums.back();
+    /* return m_nonlin ? m_weighted_sums.back()->lrelu() :
+     * *m_weighted_sums.back(); */
+    /* return m_nonlin ? m_weighted_sums.back()->tanh() :
+     * *m_weighted_sums.back(); */
+    /* return m_nonlin ? m_weighted_sums.back()->swish() :
+     * *m_weighted_sums.back(); */
 }
 
 template <typename T> std::vector<Value<T> *> Neuron<T>::parameters() {
     // Create a vector for the pointers to the parameters to modici them
     // directly
     std::vector<Value<T> *> params;
+
+    // Add the biases
+    params.push_back(&m_bias);
+
     for (auto &w : m_weights) {
         // Add the weights
         params.push_back(&w);
     }
-
-    // Add the biases
-    params.push_back(&m_bias);
     return params;
 }
 
 //  ================ Implementation  Layer =================
 
 template <typename T>
-Layer<T>::Layer(size_t num_neurons_input, size_t num_neurons_output) {
+Layer<T>::Layer(size_t num_neurons_input, size_t num_neurons_output,
+                bool nonlin) {
     // Add all the neurons to the layer by crating them
     for (size_t i = 0; i < num_neurons_output; i++) {
-        m_neurons.emplace_back(Neuron<T>(num_neurons_input));
+        m_neurons.emplace_back(Neuron<T>(num_neurons_input, nonlin));
     }
 }
 
@@ -206,8 +215,9 @@ MLP<T, N>::MLP(size_t num_neurons_input,
     for (size_t i = 1; i < N; i++) {
         // Create layers N layers with the number of neuron from the previous
         // layers and output as the current
+        bool nonlin = (i != N - 1);
         m_layers.emplace_back(
-            Layer<T>(num_neurons_output[i - 1], num_neurons_output[i]));
+            Layer<T>(num_neurons_output[i - 1], num_neurons_output[i], nonlin));
     }
 }
 
@@ -218,7 +228,7 @@ Value_Vec<T> MLP<T, N>::operator()(const Value_Vec<T> &x) {
 
     for (size_t i = 1; i <= N; i++) {
         m_layers_output.emplace_back(std::make_shared<Value_Vec<T>>(
-            m_layers[i- 1](*m_layers_output.back())));
+            m_layers[i - 1](*m_layers_output.back())));
     }
 
     // return the value of the last element which is a vector
@@ -226,7 +236,7 @@ Value_Vec<T> MLP<T, N>::operator()(const Value_Vec<T> &x) {
 }
 
 template <typename T, size_t N>
-std::vector<Value<T> *> MLP<T, N>::parameters(){
+std::vector<Value<T> *> MLP<T, N>::parameters() {
     std::vector<Value<T> *> params;
     // Iterate over all the layers
     for (auto &layer : m_layers) {

@@ -62,9 +62,3 @@ int main() {
 - [ ] Think of a better way to write the autograd engine. And also stack based topo_sort
 
 - Think about mini batches because when you mini batch you compute less accurate gradients for loss minimization but you can do it way faster and thus do way more step
-
-- Optimization breaks things
-
-- Potentially compute for the entire batch and then compute the loss I think it store less computations
-
-- There is an error in the computation of the gradient

@@ -81,8 +81,10 @@ public:
 
     friend Value operator+=(Value &lhs, const Value &rhs) {
 
-        /* std::shared_ptr<Value<T>> tmp1 = std::make_shared<Value<T>>(lhs.data, lhs.label, lhs.m_op, lhs.m_prev); */
-        /* std::shared_ptr<Value<T>> tmp2 = std::make_shared<Value<T>>(rhs.data, rhs.label, rhs.m_op, rhs.m_prev); */
+        /* std::shared_ptr<Value<T>> tmp1 = std::make_shared<Value<T>>(lhs.data,
+         * lhs.label, lhs.m_op, lhs.m_prev); */
+        /* std::shared_ptr<Value<T>> tmp2 = std::make_shared<Value<T>>(rhs.data,
+         * rhs.label, rhs.m_op, rhs.m_prev); */
 
         Value<T> *tmp1 =
             new Value<T>(lhs.data, lhs.label, lhs.m_op, lhs.m_prev);
@@ -183,13 +185,16 @@ template <typename T> void Value<T>::_backward_single() {
         break;
     case DIV:
         m_prev[0]->grad += (1.0 / (m_prev[1]->data)) * grad;
-        m_prev[1]->grad += -(m_prev[0]->data) / std::pow(m_prev[1]->data, 2.0) * grad;
+        m_prev[1]->grad +=
+            -(m_prev[0]->data) / std::pow(m_prev[1]->data, 2.0) * grad;
         break;
     case POW:
-        m_prev[0]->grad += (m_prev[1]->data *
-             std::pow(m_prev[0]->data, (m_prev[1]->data - 1.0))) * grad;
+        m_prev[0]->grad +=
+            (m_prev[1]->data *
+             std::pow(m_prev[0]->data, (m_prev[1]->data - 1.0))) *
+            grad;
         /* m_prev[0]->grad += (m_prev[1] * */
-             /* std::pow(m_prev[0]->data, (m_prev[1]->data - 1.0))) * grad; */
+        /* std::pow(m_prev[0]->data, (m_prev[1]->data - 1.0))) * grad; */
         break;
     case INV:
         // e^x is e^x which I already saved in data
@@ -203,15 +208,17 @@ template <typename T> void Value<T>::_backward_single() {
         m_prev[0]->grad += (1.0 - std::pow(data, 2.0)) * grad;
         break;
     case RELU:
-        m_prev[0]->grad += data > 0.0 ? (1.0 * grad) : 0.0;
+        m_prev[0]->grad += (data > 0.0) ? (1.0 * grad) : 0.0;
         break;
     case LRELU:
-        m_prev[0]->grad += data > 0.0 ? grad : 0.01 * grad;
+        m_prev[0]->grad += (data > 0.0) ? grad : 0.01 * grad;
         break;
     case SWISH:
         // keep in mind that data = swish(m_prev[0]->data)
         // and f'(x) = f(x) + sigmoid(x)(1 + f(x))
-        m_prev[0]->grad +=  (data + (1.0 / (1.0 + std::exp(-m_prev[0]->data))) * (1.0 + data)) *grad;
+        m_prev[0]->grad +=
+            (data + (1.0 / (1.0 + std::exp(-m_prev[0]->data))) * (1.0 + data)) *
+            grad;
         break;
     default:
         break;
@@ -244,7 +251,8 @@ template <typename T> void Value<T>::backward() {
     this->grad = 1.0;
 
     // Call backward in topological order applying the chain rule automatically
-    for (auto it = m_sorted_values.rbegin(); it != m_sorted_values.rend(); ++it) {
+    for (auto it = m_sorted_values.rbegin(); it != m_sorted_values.rend();
+         ++it) {
         (*it)->_backward_single();
     }
 }
