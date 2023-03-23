@@ -60,3 +60,7 @@ int main() {
 - [ ] Try using shared pointers even for the += to avoid memory leaks
 
 - [ ] Think of a better way to write the autograd engine. And also stack based topo_sort
+
+- [ ] Profile your code and make it faster
+
+- I also wrote code for a simple example taking inspiration from [this](https://github.com/elinx/ugrad/blob/master/examples/mlp_example.cpp)

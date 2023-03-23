@@ -81,5 +81,9 @@ int main() {
             std::cout << "The loss at step: " << j << " is: " << loss.data
                       << '\n';
         }
+
+        if (j % 1000 == 0) {
+            loss.draw_graph();
+        }
     }
 }

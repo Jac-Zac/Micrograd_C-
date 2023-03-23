@@ -2,88 +2,125 @@
 
 #define SIZE 3
 #define BATCH 4
-/* #define DATASET_SIZE 3 * 4 */
-
 typedef double TYPE;
 
-int main(int argc, char* argv[]) {
+inline Value_Vec<TYPE> read_dataset(const char *intput_file) {
+    Value_Vec<TYPE> data;
+    std::ifstream file(intput_file);
+    if (!file.is_open()) {
+        std::cout << "failed to open: " << intput_file << " file\n";
+        return {};
+    }
+
+    double x;
+    while (file >> x) {
+        data.emplace_back(Value<TYPE>(x));
+    }
+    return data;
+}
+
+
+/*
+void print_data(Value_Vec<TYPE> &inputs) {
+    // input view it as a (2, x/2) instead of a (x)
+    for(size_t i = 0; i < input.size(); i++){
+        std::cout << input[i].data;
+        if ( i %2 == 0){
+            std::cout << ", ";
+            continue;
+        }
+        std::cout << '\n';
+    }
+
+    // output
+    for(auto value : target){
+        std::cout << value.data << '\n';
+    }
+*/
+
+inline std::vector<Value_Vec<TYPE>> forward(MLP<TYPE, 3> &model, Value_Vec<TYPE> &inputs) {
+
+    std::vector<Value_Vec<TYPE>> scores;
+
+    for (size_t i = 0; i < (inputs.size() - 1) ; i++) {
+        // Forward pass
+        /* scores.emplace_back(model(tmp)); */
+        scores.emplace_back(model({inputs[i], inputs[i + 1]}));
+    }
+    return scores;
+}
+
+/*
+Value<TYPE> loss(const std::vector<Value_Vec<TYPE>>& scores,
+                                    const std:;vector<Value_Vec<TYPE>> y,
+                                    const std::vector<Value<TYPE>>&
+parameters) { Value_Vec<TYPE> losses;
+
+  for (auto i = 0; i < y.size(); ++i) {
+    losses.emplace_back(
+        (make_shared<Value>(1.0) + (-y[i][0]) * scores[i][0])->relu());
+  }
+  // svm "max-margin" loss
+  auto data_loss = std::accumulate(losses.begin(), losses.end(),
+make_shared<Value>(0.0)); data_loss = data_loss /
+make_shared<Value>(losses.size());
+
+  // L2 regularization
+  auto alpha = make_shared<Value>(1e-4);
+  auto square_sum = std::inner_product(parameters.begin(), parameters.end(),
+    parameters.begin(), make_shared<Value>(0.0));
+  auto reg_loss = alpha * square_sum;
+  auto total_loss = data_loss + reg_loss;
+
+  // get accuracy
+  double accuracy = 0.0;
+  for (auto i = 0; i < y.size(); ++i) {
+    accuracy += (scores[i][0]->data() > 0) == (y[i][0]->data() > 0);
+  }
+  accuracy /= y.size();
+  return std::make_tuple(total_loss, accuracy);
+}
+
+*/
+
+int main(int argc, char *argv[]) {
+
+    if (argc < 3) {
+        std::cout << "Usage: mlp_example X.txt y.txt\n";
+        return -1;
+    }
 
     // Need to find the files
+    Value_Vec<TYPE> inputs = read_dataset(argv[1]);
+    Value_Vec<TYPE> target = read_dataset(argv[2]);
 
-    /* auto [X, y] = read_dataset(argv[1], argv[2]); */
-    /* std::cout<< "read dataset finished, size of X\n"; */
+    // SIZE is equal to the number of layers without the first one
+    auto model = MLP<TYPE, SIZE>(2, {16, 16, 1});
+    std::cout << model << '\n';
+    std::cout << "number of parameters: " << model.parameters().size() << "\n";
 
-    // define the neural network
-    std::array<size_t, SIZE> n_neurons_for_layer = {4, 4, 1};
-    auto model = MLP<TYPE, SIZE>(3, n_neurons_for_layer);
+    const size_t epochs = 100;
+    for (size_t epoch = 0; epoch < epochs; ++epoch) {
 
-    // Create a vector for the input and view it as a (3, 4)
-    std::vector<Value_Vec<TYPE>> xs = {
-        {2.0, 3.0, -1.0}, {3.0, -1.0, 0.5}, {0.5, 1.0, 1.0}, {1.0, 1.0, -1.0}};
+        auto scores = forward(model, inputs);
+        /* scores[0][0].draw_graph(); */
 
-    /* Value_Vec_Ptr<TYPE> xs = std::make_shared<TYPE>( */
-    /*         2.0, 3.0, -1.0, */
-    /*         3.0, -1.0, 0.5, */
-    /*         0.5, 1.0, 1.0, */
-    /*         1.0, 1.0, -1.0); */
+        break;
+        /*
+        auto [total_loss, acc] = loss(scores, y, model.parameters());
 
-    // desired target
-    Value_Vec<TYPE> ys = {1.0, -1.0, -1.0, 1.0};
-
-    std::cout << model; // to output the network shape
-
-    std::cout << "\nThe network has: " << model.parameters().size()
-              << " parameters\n\n";
-
-    std::cout << "Starting Training\n";
-    std::cout << "----------------------------\n\n";
-
-    double lr = 0.005;
-
-    for (size_t j = 1; j <= 1000; j++) {
-
-        std::vector<Value_Vec<TYPE>> ypred;
-        Value_Vec<TYPE> tmp_loss;
-        Value<TYPE> loss = Value<TYPE>(0.0, "loss");
-        // Problem is with the ^ operator
-
-        // Zero grad
         model.zero_grad();
+        total_loss->backward();
 
-        // Iterate over the elements of one batch
-        for (size_t i = 0; i < BATCH; i++) {
-            // Forward pass - target
-            ypred.emplace_back(model(xs[i]));
+        double learning_rate = 1.0 - 0.9 * epoch / 100;
+        learning_rate = std::max(learning_rate, 0.001);
 
-            tmp_loss.emplace_back(ypred[i][0] - ys[i]);
+        for (auto p : model.parameters()) {
+            p->_data -= learning_rate * p->grad();
         }
 
-        // I have to compute this outside to allow the gradient to propagate
-        // correctly
-        for (size_t i = 0; i < BATCH; i++) {
-            // Mean Squared Error
-            loss += tmp_loss[i] ^ 2.0;
-        }
-
-        // backward pass
-        loss.backward();
-
-        // Change the learning rate
-        if (j < 800) {
-            lr = 0.005;
-        } else {
-            lr = 0.001;
-        }
-
-        // Update parameters thanks to the gradient
-        for (Value<TYPE> *p : model.parameters()) {
-            // Update parameter value
-            p->data += -0.01 * (p->grad);
-        }
-
-        if (j % 100 == 0) {
-            std::cout << "The loss at step: " << j << " is: " << loss.data
-                      << '\n';
-        }
+        std::cout << "epoch: " << epoc << " loss: " << total_loss->data
+                  << ", accuracy " << acc * 100 << ", lr: "<< learning_rate << "\n ";
+        */
     }
 }

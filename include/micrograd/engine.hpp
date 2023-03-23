@@ -43,9 +43,9 @@ protected:
     char m_op;
     std::array<Value<T> *, 2> m_prev; // previous values
     std::vector<Value<T> *>
-        m_sorted_values; // vector to store the sorted values
+        m_sorted_values;              // vector to store the sorted values
     std::unordered_set<Value<T> *> m_visited; // keep track of the visited nodes
-    std::shared_ptr<Value<T>> m_tmp_value;
+    std::vector<std::shared_ptr<Value<T>>> m_tmp_value;
 
 public:
     // Constructor
@@ -83,17 +83,20 @@ public:
 
     friend Value operator+=(Value &lhs, const Value &rhs) {
 
-        /* lhs.m_tmp_value = std::make_shared<Value<T>>(lhs.data, lhs.label, lhs.m_op, lhs.m_prev); */
-        /* const_cast<Value *>(&rhs)->m_tmp_value = std::make_shared<Value<T>>(rhs.data, rhs.label, rhs.m_op, rhs.m_prev); */
+        /* lhs.m_tmp_value.push_back(std::make_shared<Value<T>>(lhs.data,
+         * lhs.label, lhs.m_op, lhs.m_prev)); */
+        /* const_cast<Value
+         * *>(&rhs)->m_tmp_value.push_back(std::make_shared<Value<T>>(rhs.data,
+         * rhs.label, rhs.m_op, rhs.m_prev)); */
 
         auto tmp1 = new Value<T>(lhs.data, lhs.label, lhs.m_op, lhs.m_prev);
         auto tmp2 = new Value<T>(rhs.data, rhs.label, rhs.m_op, rhs.m_prev);
 
         if (rhs.m_prev[0] == nullptr) {
             lhs = *tmp1 + rhs;
-        }
-        else {
-            /* lhs = *lhs.m_tmp_value + *rhs.m_tmp_value; */
+            /* lhs = *(lhs.m_tmp_value.back()) + rhs; */
+        } else {
+            /* lhs = *(lhs.m_tmp_value.back()) + *(rhs.m_tmp_value.back()); */
             lhs = *tmp1 + *tmp2;
         }
 
