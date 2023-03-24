@@ -80,8 +80,6 @@ public:
                      {const_cast<Value *>(&lhs), const_cast<Value *>(&rhs)});
     }
 
-    friend Value operator-(const Value &rhs) { return rhs * (-1.0); }
-
     friend Value operator+=(Value &lhs, const Value &rhs) {
 
         /* lhs.m_tmp_value.push_back(std::make_shared<Value<T>>(lhs.data,

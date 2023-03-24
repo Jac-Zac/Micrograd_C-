@@ -16,7 +16,7 @@ file(GLOB_RECURSE SOURCES
       # examples/*.cpp
       # demo/*.cpp
       demo/demo.cpp
-      # demo/test.cpp
+      # demo/test/test.cpp
 )
 
 add_library(micrograd INTERFACE)
