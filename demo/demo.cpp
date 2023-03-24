@@ -50,42 +50,64 @@ inline std::vector<Value_Vec<TYPE>> forward(MLP<TYPE, 3> &model,
     return scores;
 }
 
-Value<TYPE> loss(const std::vector<Value_Vec<TYPE>> &scores,
-                 const Value_Vec<TYPE> &target,
+Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>>& scores,
+                 const Value_Vec<TYPE>& target,
                  const std::vector<Value<TYPE> *> parameters
                  ) {
 
-    Value_Vec<TYPE> losses;
+    Value_Vec<TYPE> tmp1;
     for (auto i = 0; i < target.size(); ++i) {
-        /* losses.emplace_back(((1.0 + (-target[i] * scores[i][0])).relu())); */
-        losses.emplace_back(target[i] * scores[i][0]);
+        tmp1.emplace_back(-target[i] * scores[i][0]);
+    }
+
+    Value_Vec<TYPE> tmp2;
+    for (auto i = 0; i < target.size(); ++i) {
+        tmp2.emplace_back((1.0 + tmp1[i]));
+    }
+
+    Value_Vec<TYPE> losses;
+    /* for (size_t i = 0; i < 3; ++i) { */
+    for (auto i = 0; i < target.size(); ++i) {
+        losses.emplace_back(tmp2[i].relu());
     }
 
     // svm "max-margin" loss
-    auto data_loss = Value<TYPE>(0.0);
+    auto tmp_data_loss = Value<TYPE>(0.0);
     for (auto& loss : losses) {
-        data_loss += loss;
+        tmp_data_loss += loss;
     }
 
-    data_loss = data_loss / losses.size();
+    auto data_loss = tmp_data_loss / losses.size();
 
     // L2 regularization
+    /*
     auto alpha = Value<TYPE>(1e-4);
 
     auto square_sum = Value<TYPE>(0.0);
-    for (auto &p : parameters) {
-        square_sum += *p * *p;
+    for (Value<TYPE>* p : parameters) {
+        square_sum += (*p ^ 2.0);
     }
+
     auto reg_loss = alpha * square_sum;
     auto total_loss = data_loss + reg_loss;
+    */
+
+    auto total_loss = data_loss;
 
     // get accuracy
     double accuracy = 0.0;
-    for (auto i = 0; i < target.size(); ++i) {
+    /* for (size_t i = 0; i < target.size(); ++i) { */
+    for (size_t i = 0; i < 3; ++i) {
         accuracy += (scores[i][0].data > 0) == (target[i].data > 0);
     }
     accuracy = accuracy / target.size();
-    std::cout << "The accuracy is: " << accuracy * 100 << '\n';
+    std::cout << " The accuracy is: " << accuracy * 100;
+
+    // Back Prop
+    total_loss.backward();
+    // Draw graph
+    /* total_loss.draw_graph(); */
+
     return total_loss;
 }
 
@@ -110,22 +132,26 @@ int main(int argc, char *argv[]) {
 
         auto scores = forward(model, inputs);
 
-        auto total_loss = loss(scores, target, model.parameters());
-
-        model.zero_grad();
-
-        total_loss.draw_graph();
+        for (auto score : scores){
+            std::cout << score[0] << '\n';
+        }
         break;
 
-        total_loss.backward();
+        auto total_loss = back_prop(scores, target, model.parameters());
+
+        model.zero_grad();
 
         double learning_rate = 1.0 - 0.9 * epoch / 100;
         learning_rate = std::max(learning_rate, 0.001);
 
         for (Value<TYPE> *p : model.parameters()) {
             p->data -= learning_rate * p->grad;
+            if (epoch == 0){
+                std::cout << *p << '\n';
+            }
         }
 
-        std::cout << "epoch: " << epoch << " loss: " << total_loss.data << '\n';
+        std::cout << " epoch: " << epoch << " loss: " << total_loss.data << '\n';
+        break;
     }
 }
