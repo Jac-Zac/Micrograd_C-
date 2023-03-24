@@ -19,7 +19,6 @@ inline Value_Vec<TYPE> read_dataset(const char *intput_file) {
     return data;
 }
 
-
 /*
 void print_data(Value_Vec<TYPE> &inputs) {
     // input view it as a (2, x/2) instead of a (x)
@@ -38,11 +37,12 @@ void print_data(Value_Vec<TYPE> &inputs) {
     }
 */
 
-inline std::vector<Value_Vec<TYPE>> forward(MLP<TYPE, 3> &model, Value_Vec<TYPE> &inputs) {
+inline std::vector<Value_Vec<TYPE>> forward(MLP<TYPE, 3> &model,
+                                            Value_Vec<TYPE> &inputs) {
 
     std::vector<Value_Vec<TYPE>> scores;
 
-    for (size_t i = 0; i < (inputs.size() - 1) ; i++) {
+    for (size_t i = 0; i < (inputs.size() - 1); i++) {
         // Forward pass
         /* scores.emplace_back(model(tmp)); */
         scores.emplace_back(model({inputs[i], inputs[i + 1]}));
@@ -50,38 +50,44 @@ inline std::vector<Value_Vec<TYPE>> forward(MLP<TYPE, 3> &model, Value_Vec<TYPE>
     return scores;
 }
 
-/*
-Value<TYPE> loss(const std::vector<Value_Vec<TYPE>>& scores,
-                                    const std:;vector<Value_Vec<TYPE>> y,
-                                    const std::vector<Value<TYPE>>&
-parameters) { Value_Vec<TYPE> losses;
+Value<TYPE> loss(const std::vector<Value_Vec<TYPE>> &scores,
+                 const Value_Vec<TYPE> &target,
+                 const std::vector<Value<TYPE> *> parameters
+                 ) {
 
-  for (auto i = 0; i < y.size(); ++i) {
-    losses.emplace_back(
-        (make_shared<Value>(1.0) + (-y[i][0]) * scores[i][0])->relu());
-  }
-  // svm "max-margin" loss
-  auto data_loss = std::accumulate(losses.begin(), losses.end(),
-make_shared<Value>(0.0)); data_loss = data_loss /
-make_shared<Value>(losses.size());
+    Value_Vec<TYPE> losses;
+    for (auto i = 0; i < target.size(); ++i) {
+        /* losses.emplace_back(((1.0 + (-target[i] * scores[i][0])).relu())); */
+        losses.emplace_back(target[i] * scores[i][0]);
+    }
 
-  // L2 regularization
-  auto alpha = make_shared<Value>(1e-4);
-  auto square_sum = std::inner_product(parameters.begin(), parameters.end(),
-    parameters.begin(), make_shared<Value>(0.0));
-  auto reg_loss = alpha * square_sum;
-  auto total_loss = data_loss + reg_loss;
+    // svm "max-margin" loss
+    auto data_loss = Value<TYPE>(0.0);
+    for (auto& loss : losses) {
+        data_loss += loss;
+    }
 
-  // get accuracy
-  double accuracy = 0.0;
-  for (auto i = 0; i < y.size(); ++i) {
-    accuracy += (scores[i][0]->data() > 0) == (y[i][0]->data() > 0);
-  }
-  accuracy /= y.size();
-  return std::make_tuple(total_loss, accuracy);
+    data_loss = data_loss / losses.size();
+
+    // L2 regularization
+    auto alpha = Value<TYPE>(1e-4);
+
+    auto square_sum = Value<TYPE>(0.0);
+    for (auto &p : parameters) {
+        square_sum += *p * *p;
+    }
+    auto reg_loss = alpha * square_sum;
+    auto total_loss = data_loss + reg_loss;
+
+    // get accuracy
+    double accuracy = 0.0;
+    for (auto i = 0; i < target.size(); ++i) {
+        accuracy += (scores[i][0].data > 0) == (target[i].data > 0);
+    }
+    accuracy = accuracy / target.size();
+    std::cout << "The accuracy is: " << accuracy * 100 << '\n';
+    return total_loss;
 }
-
-*/
 
 int main(int argc, char *argv[]) {
 
@@ -103,24 +109,23 @@ int main(int argc, char *argv[]) {
     for (size_t epoch = 0; epoch < epochs; ++epoch) {
 
         auto scores = forward(model, inputs);
-        /* scores[0][0].draw_graph(); */
 
-        break;
-        /*
-        auto [total_loss, acc] = loss(scores, y, model.parameters());
+        auto total_loss = loss(scores, target, model.parameters());
 
         model.zero_grad();
-        total_loss->backward();
+
+        total_loss.draw_graph();
+        break;
+
+        total_loss.backward();
 
         double learning_rate = 1.0 - 0.9 * epoch / 100;
         learning_rate = std::max(learning_rate, 0.001);
 
-        for (auto p : model.parameters()) {
-            p->_data -= learning_rate * p->grad();
+        for (Value<TYPE> *p : model.parameters()) {
+            p->data -= learning_rate * p->grad;
         }
 
-        std::cout << "epoch: " << epoc << " loss: " << total_loss->data
-                  << ", accuracy " << acc * 100 << ", lr: "<< learning_rate << "\n ";
-        */
+        std::cout << "epoch: " << epoch << " loss: " << total_loss.data << '\n';
     }
 }

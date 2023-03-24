@@ -25,7 +25,6 @@ enum ops_type : char {
     POW = '^',
     INV = 'i',
     EXP = 'e',
-    NEG = 'n',
     TANH = 't',
     RELU = 'r',
     LRELU = 'l',
@@ -80,6 +79,8 @@ public:
         return Value(std::pow(lhs.data, rhs.data), "", POW,
                      {const_cast<Value *>(&lhs), const_cast<Value *>(&rhs)});
     }
+
+    friend Value operator-(const Value &rhs) { return rhs * (-1.0); }
 
     friend Value operator+=(Value &lhs, const Value &rhs) {
 
