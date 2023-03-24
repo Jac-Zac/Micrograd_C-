@@ -120,7 +120,7 @@ template <typename T>
 Neuron<T>::Neuron(size_t number_of_neurons_input, bool nonlin)
     : m_num_neurons_input(number_of_neurons_input), m_nonlin(nonlin),
       /* m_bias(Value<T>(random_uniform(-1.0, 1.0), "bias")) { */
-      m_bias(Value<T>(random_uniform(-1.0, 1.0), "bias")) {
+      m_bias(Value<T>(0.0, "bias")) {
     for (size_t i = 0; i < m_num_neurons_input; i++) {
         m_weights.emplace_back(Value<T>(random_uniform(-1.0, 1.0), "weight"));
     }
@@ -142,11 +142,14 @@ template <typename T> Value<T> Neuron<T>::operator()(const Value_Vec<T> &x) {
     *m_weighted_sums.back() += m_bias;
 
     // return the activated value
-    return m_nonlin ? m_weighted_sums.back()->relu() : *m_weighted_sums.back();
-    /* return m_nonlin ? m_weighted_sums.back()->lrelu() : *m_weighted_sums.back(); */
-    /* return m_nonlin ? m_weighted_sums.back()->tanh() : *m_weighted_sums.back(); */
+    /* return m_nonlin ? m_weighted_sums.back()->relu() :
+     * *m_weighted_sums.back(); */
+    return m_nonlin ? m_weighted_sums.back()->lrelu() : *m_weighted_sums.back();
+    /* return m_nonlin ? m_weighted_sums.back()->tanh() :
+     * *m_weighted_sums.back(); */
 
-    /* return m_nonlin ? m_weighted_sums.back()->swish() :*m_weighted_sums.back(); */
+    /* return m_nonlin ? m_weighted_sums.back()->swish()
+     * :*m_weighted_sums.back(); */
 }
 
 template <typename T> std::vector<Value<T> *> Neuron<T>::parameters() {

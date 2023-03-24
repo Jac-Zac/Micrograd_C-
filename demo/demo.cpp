@@ -40,14 +40,15 @@ int main(int argc, char *argv[]) {
         auto total_loss = back_prop(scores, target, model.parameters());
 
         // Weights update
-        double learning_rate = 1.0 - (0.9 * epoch)/100;
+        double learning_rate = 1.0 - (0.9 * epoch) / 100;
         learning_rate = std::max(learning_rate, 0.001);
 
         for (Value<TYPE> *p : model.parameters()) {
             p->data -= learning_rate * p->grad;
         }
 
-        std::cout << " epoch: " << epoch << " loss: " << total_loss.data << '\n';
+        std::cout << " epoch: " << epoch << " loss: " << total_loss.data
+                  << '\n';
     }
 }
 
@@ -129,7 +130,7 @@ Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>> &scores,
     auto square_sum = Value<TYPE>(0.0);
 
     // L2 regularization
-    for (Value<TYPE>* p : parameters) {
+    for (Value<TYPE> *p : parameters) {
         square_sum += (*p ^ 2.0);
     }
 
