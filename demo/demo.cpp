@@ -41,14 +41,13 @@ int main(int argc, char *argv[]) {
 
         // Weights update
         double learning_rate = 1.0 - (0.9 * epoch)/100;
-        /* learning_rate = std::max(learning_rate, 0.001); */
+        learning_rate = std::max(learning_rate, 0.001);
 
         for (Value<TYPE> *p : model.parameters()) {
             p->data -= learning_rate * p->grad;
         }
 
-        std::cout << " epoch: " << epoch << " loss: " << total_loss.data
-                  << '\n';
+        std::cout << " epoch: " << epoch << " loss: " << total_loss.data << '\n';
     }
 }
 
@@ -124,26 +123,26 @@ Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>> &scores,
     for (auto &loss : losses) {
         sum_losses += loss;
     }
-    auto data_loss = sum_losses * (1.0 / losses.size());
+
+    auto alpha = Value<TYPE>(0.0001);
+
+    auto square_sum = Value<TYPE>(0.0);
 
     // L2 regularization
-    /* auto alpha = Value<TYPE>(1e-4); */
-    /*  */
-    /* auto square_sum = Value<TYPE>(0.0); */
-    /* for (Value<TYPE>* p : parameters) { */
-        /* square_sum += (*p ^ 2.0); */
-    /*  */
-    /* } */
+    for (Value<TYPE>* p : parameters) {
+        square_sum += (*p ^ 2.0);
+    }
 
+    auto data_loss = sum_losses * (1.0 / losses.size());
+
+    /* std::cout << "Sum square: " << square_sum * 0.0001<< '\n'; */
     /* auto reg_loss = alpha * square_sum; */
+
     /* auto total_loss = data_loss + reg_loss; */
     auto total_loss = data_loss;
 
     // Back Prop
     total_loss.backward();
-    // Draw graph
-    /* total_loss.draw_graph(); */
-
 
     double accuracy = 0.0;
     for (size_t i = 0; i < target.size(); ++i) {
