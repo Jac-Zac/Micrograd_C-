@@ -19,11 +19,10 @@ inline Value_Vec<TYPE> read_dataset(const char *intput_file) {
     return data;
 }
 
-/*
-void print_data(Value_Vec<TYPE> &inputs) {
+void print_data(Value_Vec<TYPE> &inputs, Value_Vec<TYPE> &target) {
     // input view it as a (2, x/2) instead of a (x)
-    for(size_t i = 0; i < input.size(); i++){
-        std::cout << input[i].data;
+    for(size_t i = 0; i < inputs.size(); i++){
+        std::cout << inputs[i];
         if ( i %2 == 0){
             std::cout << ", ";
             continue;
@@ -35,16 +34,15 @@ void print_data(Value_Vec<TYPE> &inputs) {
     for(auto value : target){
         std::cout << value.data << '\n';
     }
-*/
+}
 
 inline std::vector<Value_Vec<TYPE>> forward(MLP<TYPE, 3> &model,
                                             Value_Vec<TYPE> &inputs) {
-
     std::vector<Value_Vec<TYPE>> scores;
 
-    for (size_t i = 0; i < (inputs.size() - 1); i++) {
+    // I need to go two step at a time since I'm reinterpreting it as a (2,x/2)
+    for (size_t i = 0; i < (inputs.size() - 1); i+=2) {
         // Forward pass
-        /* scores.emplace_back(model(tmp)); */
         scores.emplace_back(model({inputs[i], inputs[i + 1]}));
     }
     return scores;
@@ -130,10 +128,12 @@ int main(int argc, char *argv[]) {
     const size_t epochs = 100;
     for (size_t epoch = 0; epoch < epochs; ++epoch) {
 
+        print_data(inputs,target);
+
         auto scores = forward(model, inputs);
 
-        for (auto score : scores){
-            std::cout << score[0] << '\n';
+        for (size_t i = 0; i < scores.size(); i++){
+            std::cout << scores[i][0] << '\n';
         }
         break;
 
