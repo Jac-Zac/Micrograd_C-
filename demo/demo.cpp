@@ -4,6 +4,65 @@
 #define BATCH 4
 typedef double TYPE;
 
+// Functions prototipe
+inline Value_Vec<TYPE> read_dataset(const char *intput_file);
+void print_data(Value_Vec<TYPE> &inputs, Value_Vec<TYPE> &target);
+inline std::vector<Value_Vec<TYPE>> forward(MLP<TYPE, 3> &model,
+                                            Value_Vec<TYPE> &inputs);
+Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>> &scores,
+                      const Value_Vec<TYPE> &target,
+                      const std::vector<Value<TYPE> *> parameters);
+
+// Main function
+int main(int argc, char *argv[]) {
+
+    if (argc < 3) {
+        std::cout << "Usage: mlp_example X.txt y.txt\n";
+        return -1;
+    }
+
+    // Need to find the files
+    Value_Vec<TYPE> inputs = read_dataset(argv[1]);
+    Value_Vec<TYPE> target = read_dataset(argv[2]);
+
+    // SIZE is equal to the number of layers without the first one
+    auto model = MLP<TYPE, SIZE>(2, {16, 16, 1});
+    std::cout << model << '\n';
+    std::cout << "number of parameters: " << model.parameters().size() << "\n";
+
+    const size_t epochs = 100;
+    for (size_t epoch = 0; epoch < epochs; ++epoch) {
+
+        auto scores = forward(model, inputs);
+
+        /* for (size_t i = 0; i < scores.size(); i++) { */
+        /*     std::cout << scores[i][0] << '\n'; */
+        /* } */
+        /* break; */
+
+        auto total_loss = back_prop(scores, target, model.parameters());
+
+        model.zero_grad();
+
+        double learning_rate = 1.0 - 0.9 * epoch / 100;
+        learning_rate = std::max(learning_rate, 0.001);
+
+        for (Value<TYPE> *p : model.parameters()) {
+            p->data -= learning_rate * p->grad;
+            if (epoch == 0) {
+                std::cout << *p << '\n';
+            }
+        }
+
+        std::cout << " epoch: " << epoch << " loss: " << total_loss.data
+                  << '\n';
+        break;
+    }
+}
+
+// Functions implementation
+// -----------------------------------------------------------------------------
+
 inline Value_Vec<TYPE> read_dataset(const char *intput_file) {
     Value_Vec<TYPE> data;
     std::ifstream file(intput_file);
@@ -21,9 +80,9 @@ inline Value_Vec<TYPE> read_dataset(const char *intput_file) {
 
 void print_data(Value_Vec<TYPE> &inputs, Value_Vec<TYPE> &target) {
     // input view it as a (2, x/2) instead of a (x)
-    for(size_t i = 0; i < inputs.size(); i++){
+    for (size_t i = 0; i < inputs.size(); i++) {
         std::cout << inputs[i];
-        if ( i %2 == 0){
+        if (i % 2 == 0) {
             std::cout << ", ";
             continue;
         }
@@ -31,7 +90,7 @@ void print_data(Value_Vec<TYPE> &inputs, Value_Vec<TYPE> &target) {
     }
 
     // output
-    for(auto value : target){
+    for (auto value : target) {
         std::cout << value.data << '\n';
     }
 }
@@ -41,17 +100,16 @@ inline std::vector<Value_Vec<TYPE>> forward(MLP<TYPE, 3> &model,
     std::vector<Value_Vec<TYPE>> scores;
 
     // I need to go two step at a time since I'm reinterpreting it as a (2,x/2)
-    for (size_t i = 0; i < (inputs.size() - 1); i+=2) {
+    for (size_t i = 0; i < (inputs.size() - 1); i += 2) {
         // Forward pass
         scores.emplace_back(model({inputs[i], inputs[i + 1]}));
     }
     return scores;
 }
 
-Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>>& scores,
-                 const Value_Vec<TYPE>& target,
-                 const std::vector<Value<TYPE> *> parameters
-                 ) {
+Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>> &scores,
+                      const Value_Vec<TYPE> &target,
+                      const std::vector<Value<TYPE> *> parameters) {
 
     Value_Vec<TYPE> tmp1;
     for (auto i = 0; i < target.size(); ++i) {
@@ -71,7 +129,7 @@ Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>>& scores,
 
     // svm "max-margin" loss
     auto tmp_data_loss = Value<TYPE>(0.0);
-    for (auto& loss : losses) {
+    for (auto &loss : losses) {
         tmp_data_loss += loss;
     }
 
@@ -107,51 +165,4 @@ Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>>& scores,
     /* total_loss.draw_graph(); */
 
     return total_loss;
-}
-
-int main(int argc, char *argv[]) {
-
-    if (argc < 3) {
-        std::cout << "Usage: mlp_example X.txt y.txt\n";
-        return -1;
-    }
-
-    // Need to find the files
-    Value_Vec<TYPE> inputs = read_dataset(argv[1]);
-    Value_Vec<TYPE> target = read_dataset(argv[2]);
-
-    // SIZE is equal to the number of layers without the first one
-    auto model = MLP<TYPE, SIZE>(2, {16, 16, 1});
-    std::cout << model << '\n';
-    std::cout << "number of parameters: " << model.parameters().size() << "\n";
-
-    const size_t epochs = 100;
-    for (size_t epoch = 0; epoch < epochs; ++epoch) {
-
-        print_data(inputs,target);
-
-        auto scores = forward(model, inputs);
-
-        for (size_t i = 0; i < scores.size(); i++){
-            std::cout << scores[i][0] << '\n';
-        }
-        break;
-
-        auto total_loss = back_prop(scores, target, model.parameters());
-
-        model.zero_grad();
-
-        double learning_rate = 1.0 - 0.9 * epoch / 100;
-        learning_rate = std::max(learning_rate, 0.001);
-
-        for (Value<TYPE> *p : model.parameters()) {
-            p->data -= learning_rate * p->grad;
-            if (epoch == 0){
-                std::cout << *p << '\n';
-            }
-        }
-
-        std::cout << " epoch: " << epoch << " loss: " << total_loss.data << '\n';
-        break;
-    }
 }
