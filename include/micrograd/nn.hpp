@@ -144,12 +144,10 @@ template <typename T> Value<T> Neuron<T>::operator()(const Value_Vec<T> &x) {
 
     // return the activated value
     return m_nonlin ? m_weighted_sums.back()->relu() : *m_weighted_sums.back();
-    /* return m_nonlin ? m_weighted_sums.back()->lrelu() :
-     * *m_weighted_sums.back(); */
-    /* return m_nonlin ? m_weighted_sums.back()->tanh() :
-     * *m_weighted_sums.back(); */
-    /* return m_nonlin ? m_weighted_sums.back()->swish() :
-     * *m_weighted_sums.back(); */
+    /* return m_nonlin ? m_weighted_sums.back()->lrelu() : *m_weighted_sums.back(); */
+    /* return m_nonlin ? m_weighted_sums.back()->tanh() : *m_weighted_sums.back(); */
+
+    /* return m_nonlin ? m_weighted_sums.back()->swish() :*m_weighted_sums.back(); */
 }
 
 template <typename T> std::vector<Value<T> *> Neuron<T>::parameters() {

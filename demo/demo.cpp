@@ -127,18 +127,16 @@ Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>> &scores,
     auto data_loss = sum_losses * (1.0 / losses.size());
 
     // L2 regularization
-    /*
-    auto alpha = Value<TYPE>(1e-4);
+    /* auto alpha = Value<TYPE>(1e-4); */
+    /*  */
+    /* auto square_sum = Value<TYPE>(0.0); */
+    /* for (Value<TYPE>* p : parameters) { */
+        /* square_sum += (*p ^ 2.0); */
+    /*  */
+    /* } */
 
-    auto square_sum = Value<TYPE>(0.0);
-    for (Value<TYPE>* p : parameters) {
-        square_sum += (*p ^ 2.0);
-    }
-
-    auto reg_loss = alpha * square_sum;
-    auto total_loss = data_loss + reg_loss;
-    */
-
+    /* auto reg_loss = alpha * square_sum; */
+    /* auto total_loss = data_loss + reg_loss; */
     auto total_loss = data_loss;
 
     // Back Prop
