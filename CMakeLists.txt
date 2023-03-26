@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 # set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -O0")
 
 # I can use optimization to run the neural network but breaks ops
-set(CMAKE_CXX_FLAGS "-O3")
+set(CMAKE_CXX_FLAGS "-O2")
 
 file(GLOB_RECURSE SOURCES
       # micrograd/*.cpp

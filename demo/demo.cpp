@@ -6,7 +6,6 @@ typedef double TYPE;
 
 // Functions prototipe
 inline Value_Vec<TYPE> read_dataset(const char *intput_file);
-void print_data(Value_Vec<TYPE> &inputs, Value_Vec<TYPE> &target);
 inline std::vector<Value_Vec<TYPE>> forward(MLP<TYPE, 3> &model,
                                             Value_Vec<TYPE> &inputs);
 Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>> &scores,
@@ -70,23 +69,6 @@ inline Value_Vec<TYPE> read_dataset(const char *intput_file) {
     return data;
 }
 
-void print_data(Value_Vec<TYPE> &inputs, Value_Vec<TYPE> &target) {
-    // input view it as a (2, x/2) instead of a (x)
-    for (size_t i = 0; i < inputs.size(); i++) {
-        std::cout << inputs[i];
-        if (i % 2 == 0) {
-            std::cout << ", ";
-            continue;
-        }
-        std::cout << '\n';
-    }
-
-    // output
-    for (auto value : target) {
-        std::cout << value.data << '\n';
-    }
-}
-
 inline std::vector<Value_Vec<TYPE>> forward(MLP<TYPE, 3> &model,
                                             Value_Vec<TYPE> &inputs) {
     std::vector<Value_Vec<TYPE>> scores;
@@ -125,21 +107,21 @@ Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>> &scores,
         sum_losses += loss;
     }
 
-    auto alpha = Value<TYPE>(0.0001);
-
     auto square_sum = Value<TYPE>(0.0);
 
-    // L2 regularization
-    for (Value<TYPE> *p : parameters) {
-        square_sum += (*p ^ 2.0);
-    }
-
+    /* auto alpha = Value<TYPE>(0.0001); */
+    /*  */
+    /* // L2 regularization */
+    /* for (Value<TYPE> *p : parameters) { */
+    /*     square_sum += (*p ^ 2.0); */
+    /* } */
+    /*  */
     auto data_loss = sum_losses * (1.0 / losses.size());
-
-    /* std::cout << "Sum square: " << square_sum * 0.0001<< '\n'; */
+    /*  */
     /* auto reg_loss = alpha * square_sum; */
-
+    /*  */
     /* auto total_loss = data_loss + reg_loss; */
+
     auto total_loss = data_loss;
 
     // Back Prop
