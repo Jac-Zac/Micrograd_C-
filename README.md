@@ -64,3 +64,5 @@ int main() {
 - [ ] Profile your code and make it faster
 
 - I also wrote code for a simple example taking inspiration from [this](https://github.com/elinx/ugrad/blob/master/examples/mlp_example.cpp)
+
+- Take a look at valarray and cppyy
