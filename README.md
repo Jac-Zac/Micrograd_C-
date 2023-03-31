@@ -11,6 +11,12 @@ A tiny Autograd engine rewritten in c++ from [`micrograd`](https://github.com/ka
 cmake -Boutput && cd output && make && ./test_executable
 ```
 
+##### If you want to run the python example:
+
+```bash
+pip3 install cppyy
+```
+
 ### Single perception example;
 > Example of a perception to show different ops
 ```cpp
