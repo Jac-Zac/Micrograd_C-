@@ -14,8 +14,14 @@ int main() {
     auto model = MLP<TYPE, SIZE>(3, n_neurons_for_layer);
 
     // Create a vector for the input and view it as a (3, 4)
+    /* Value_Vec<TYPE> xs = {2.0, 3.0, -1.0, */
+    /*                       3.0, -1.0, 0.5, */
+    /*                       0.5, 1.0, 1.0, */
+    /*                       1.0, 1.0, -1.0}; */
+
     std::vector<Value_Vec<TYPE>> xs = {
         {2.0, 3.0, -1.0}, {3.0, -1.0, 0.5}, {0.5, 1.0, 1.0}, {1.0, 1.0, -1.0}};
+
 
     /* Value_Vec_Ptr<TYPE> xs = std::make_shared<TYPE>( */
     /*         2.0, 3.0, -1.0, */
@@ -38,31 +44,10 @@ int main() {
 
     for (size_t j = 1; j <= 1000; j++) {
 
-        std::vector<Value_Vec<TYPE>> ypred;
-        Value_Vec<TYPE> tmp_loss;
-        Value<TYPE> loss = Value<TYPE>(0.0, "loss");
-        // Problem is with the ^ operator
-
         // Zero grad
         model.zero_grad();
 
-        // Iterate over the elements of one batch
-        for (size_t i = 0; i < BATCH; i++) {
-            // Forward pass - target
-            ypred.emplace_back(model(xs[i]));
-
-            tmp_loss.emplace_back(ypred[i][0] - ys[i]);
-        }
-
-        // I have to compute this outside to allow the gradient to propagate
-        // correctly
-        for (size_t i = 0; i < BATCH; i++) {
-            // Mean Squared Error
-            loss += tmp_loss[i] ^ 2.0;
-        }
-
-        // backward pass
-        loss.backward();
+        auto loss = model.MSE_loss_backprop(xs, ys, BATCH);
 
         // Change the learning rate
         if (j < 800) {
@@ -80,10 +65,6 @@ int main() {
         if (j % 100 == 0) {
             std::cout << "The loss at step: " << j << " is: " << loss.data
                       << '\n';
-        }
-
-        if (j % 1000 == 0) {
-            loss.draw_graph();
         }
     }
 }

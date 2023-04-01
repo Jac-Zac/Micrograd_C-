@@ -88,6 +88,8 @@ public:
     // Call operator: w * x + b dot product
     Value_Vec<T> operator()(const Value_Vec<T> &x);
 
+    Value<T> MSE_loss_backprop(std::vector<Value_Vec<T>>& input, Value_Vec<T>& target, size_t batch_size);
+
     // Declare the operator<< function as a friend function and get the
     // structure of the network
     friend std::ostream &operator<<(std::ostream &os, const MLP<T, N> &mlp) {
@@ -234,6 +236,37 @@ Value_Vec<T> MLP<T, N>::operator()(const Value_Vec<T> &x) {
 
     // return the value of the last element which is a vector
     return *(m_layers_output.back());
+}
+
+
+template <typename T, size_t N>
+Value<T> MLP<T, N>::MSE_loss_backprop(std::vector<Value_Vec<T>>& input, Value_Vec<T>& target, size_t batch_size){
+
+    Value_Vec<T> tmp_loss;
+    std::vector<Value_Vec<T>> output;
+    Value<T> loss = Value<T>(0.0, "loss");
+
+    for (size_t i = 0; i < batch_size; i++) {
+        // Forward pass - target
+        output.emplace_back(operator()(input[i]));
+
+    }
+
+    for (size_t i = 0; i < batch_size; i++) {
+        for (size_t j= 0; j < output[i].size(); j++){
+            tmp_loss.emplace_back(output[i][j] - target[i]);
+        }
+    }
+
+    for (size_t i = 0; i < batch_size; i++) {
+        for (size_t j= 0; j < output[i].size(); j++){
+            loss += tmp_loss[i] ^ 2.0;
+        }
+    }
+
+    loss.backward();
+
+    return loss;
 }
 
 template <typename T, size_t N>
