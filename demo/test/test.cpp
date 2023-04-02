@@ -29,7 +29,7 @@ int main() {
     /*         1.0, 1.0, -1.0); */
 
     // desired target
-    Value_Vec<TYPE> ys = {1.0, -1.0, -1.0, 1.0};
+    std::vector<Value_Vec<TYPE>> ys = {{1.0},{-1.0},{-1.0},{1.0}};
 
     std::cout << model; // to output the network shape
 

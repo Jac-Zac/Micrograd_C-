@@ -89,7 +89,7 @@ public:
     Value_Vec<T> operator()(const Value_Vec<T> &x);
 
     Value<T> MSE_loss_backprop(std::vector<Value_Vec<T>> &input,
-                               Value_Vec<T> &target, size_t batch_size);
+                               std::vector<Value_Vec<T>> &target, size_t batch_size);
 
     // Declare the operator<< function as a friend function and get the
     // structure of the network
@@ -241,7 +241,7 @@ Value_Vec<T> MLP<T, N>::operator()(const Value_Vec<T> &x) {
 
 template <typename T, size_t N>
 Value<T> MLP<T, N>::MSE_loss_backprop(std::vector<Value_Vec<T>> &input,
-                                      Value_Vec<T> &target, size_t batch_size) {
+                                      std::vector<Value_Vec<T>> &target, size_t batch_size) {
 
     Value_Vec<T> tmp_loss;
     std::vector<Value_Vec<T>> output;
@@ -254,7 +254,7 @@ Value<T> MLP<T, N>::MSE_loss_backprop(std::vector<Value_Vec<T>> &input,
 
     for (size_t i = 0; i < batch_size; i++) {
         for (size_t j = 0; j < output[i].size(); j++) {
-            tmp_loss.emplace_back(output[i][j] - target[i]);
+            tmp_loss.emplace_back(output[i][j] - target[i][j]);
         }
     }
 
