@@ -20,7 +20,7 @@ int main() {
     /*                       1.0, 1.0, -1.0}; */
 
     std::vector<Value_Vec<TYPE>> xs = {
-        {2.0, 3.0, -1.0}, {3.0, -1.0, 0.5}, {0.5, 1.0, 1.0}, {1.0, 1.0, -1.0}};
+        {Value<TYPE>(2.0), Value<TYPE>(3.0), Value<TYPE>(-1.0)}, {Value<TYPE>(3.0), Value<TYPE>(-1.0), Value<TYPE>(0.5)}, {Value<TYPE>(0.5), Value<TYPE>(1.0), Value<TYPE>(1.0)}, {Value<TYPE>(1.0), Value<TYPE>(1.0), Value<TYPE>(-1.0)}};
 
     /* Value_Vec_Ptr<TYPE> xs = std::make_shared<TYPE>( */
     /*         2.0, 3.0, -1.0, */
