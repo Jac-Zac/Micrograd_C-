@@ -44,9 +44,6 @@ int main() {
         Value<TYPE> loss = Value<TYPE>(0.0, "loss");
         // Problem is with the ^ operator
 
-        // Zero grad
-        model.zero_grad();
-
         // Iterate over the elements of one batch
         for (size_t i = 0; i < BATCH; i++) {
             // Forward pass - target
@@ -62,6 +59,10 @@ int main() {
             // Mean Squared Error
             loss += tmp_loss[i] ^ 2.0;
         }
+
+        // Zero grad right before the backward pass is more accurate
+
+        model.zero_grad();
 
         // backward pass
         loss.backward();

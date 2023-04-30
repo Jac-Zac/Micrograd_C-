@@ -32,9 +32,10 @@ int main(int argc, char *argv[]) {
     const size_t epochs = 100;
     for (size_t epoch = 0; epoch < epochs; ++epoch) {
 
-        model.zero_grad();
-
         auto scores = forward(model, inputs);
+
+        // Zero grad right before the back_prop
+        model.zero_grad();
 
         auto total_loss = back_prop(scores, target, model.parameters());
 
