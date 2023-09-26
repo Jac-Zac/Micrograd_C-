@@ -14,7 +14,6 @@ Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>> &scores,
 
 // Main function
 int main(int argc, char *argv[]) {
-
     if (argc < 3) {
         std::cout << "Usage: mlp_example X.txt y.txt\n";
         return -1;
@@ -31,7 +30,6 @@ int main(int argc, char *argv[]) {
 
     const size_t epochs = 100;
     for (size_t epoch = 0; epoch < epochs; ++epoch) {
-
         model.zero_grad();
 
         auto scores = forward(model, inputs);
@@ -84,8 +82,7 @@ inline std::vector<Value_Vec<TYPE>> forward(MLP<TYPE, 3> &model,
 Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>> &scores,
                       const Value_Vec<TYPE> &target,
                       const std::vector<Value<TYPE> *> parameters) {
-
-    // Need to devide it in multiple step to hold the keep the computation
+    // Need to divide it in multiple step to hold the keep the computation
     Value_Vec<TYPE> tmp1;
     for (size_t i = 0; i < target.size(); i++) {
         tmp1.emplace_back(target[i] * scores[i][0]);
@@ -109,14 +106,14 @@ Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>> &scores,
 
     auto square_sum = Value<TYPE>(0.0);
 
-    /* auto alpha = Value<TYPE>(0.0001); */
+    // auto alpha = Value<TYPE>(0.0001);
+
+    // L2 regularization
+    for (Value<TYPE> *p : parameters) {
+        square_sum += (*p ^ 2.0);
+    }
     /*  */
-    /* // L2 regularization */
-    /* for (Value<TYPE> *p : parameters) { */
-    /*     square_sum += (*p ^ 2.0); */
-    /* } */
-    /*  */
-    auto data_loss = sum_losses * (1.0 / losses.size());
+    // auto data_loss = sum_losses * (1.0 / losses.size());
     /*  */
     /* auto reg_loss = alpha * square_sum; */
     /*  */
