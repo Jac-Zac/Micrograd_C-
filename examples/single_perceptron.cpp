@@ -1,3 +1,9 @@
+//  single_perceptron.cpp
+//  Micrograd_C++
+//
+//  Created by Jacopo Zacchigna on 2023-02-19
+//  Copyright © 2023 Jacopo Zacchigna. All rights reserved.
+
 #include <micrograd/engine.hpp>
 
 using namespace value_engine;

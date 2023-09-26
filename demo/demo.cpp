@@ -1,10 +1,16 @@
+//  demo.cpp
+//  micrograd_c++
+//
+//  created by jacopo zacchigna on 2023-02-19
+//  copyright © 2023 jacopo zacchigna. all rights reserved.
+
 #include <micrograd/nn.hpp>
 
 #define SIZE 3
 #define BATCH 4
 typedef double TYPE;
 
-// Functions prototipe
+// Functions prototype
 inline Value_Vec<TYPE> read_dataset(const char *intput_file);
 inline std::vector<Value_Vec<TYPE>> forward(MLP<TYPE, 3> &model,
                                             Value_Vec<TYPE> &inputs);
@@ -14,7 +20,6 @@ Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>> &scores,
 
 // Main function
 int main(int argc, char *argv[]) {
-
     if (argc < 3) {
         std::cout << "Usage: mlp_example X.txt y.txt\n";
         return -1;
@@ -85,7 +90,6 @@ inline std::vector<Value_Vec<TYPE>> forward(MLP<TYPE, 3> &model,
 Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>> &scores,
                       const Value_Vec<TYPE> &target,
                       const std::vector<Value<TYPE> *> parameters) {
-
     // Need to devide it in multiple step to hold the keep the computation
     Value_Vec<TYPE> tmp1;
     for (size_t i = 0; i < target.size(); i++) {
@@ -110,18 +114,16 @@ Value<TYPE> back_prop(const std::vector<Value_Vec<TYPE>> &scores,
 
     auto square_sum = Value<TYPE>(0.0);
 
-    /* auto alpha = Value<TYPE>(0.0001); */
-    /*  */
-    /* // L2 regularization */
-    /* for (Value<TYPE> *p : parameters) { */
-    /*     square_sum += (*p ^ 2.0); */
-    /* } */
-    /*  */
+    // auto alpha = Value<TYPE>(0.0001);
+    // // L2 regularization
+    // for (Value<TYPE> *p : parameters) {
+    //      square_sum += (*p ^ 2.0);
+    // }
+
     auto data_loss = sum_losses * (1.0 / losses.size());
-    /*  */
-    /* auto reg_loss = alpha * square_sum; */
-    /*  */
-    /* auto total_loss = data_loss + reg_loss; */
+
+    // auto reg_loss = alpha * square_sum;
+    // auto total_loss = data_loss + reg_loss;
 
     auto total_loss = data_loss;
 

@@ -14,9 +14,10 @@ file(GLOB_RECURSE SOURCES
       # micrograd/*.cpp
       # micrograd/**/*.cpp
       # examples/*.cpp
+      examples/video_example.cpp
       # demo/*.cpp
       # demo/demo.cpp
-      demo/test/test.cpp
+      # demo/test/test.cpp
 )
 
 add_library(micrograd INTERFACE)

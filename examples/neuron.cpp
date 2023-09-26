@@ -1,7 +1,6 @@
 #include <micrograd/nn.hpp>
 
 int main() {
-
     // Three neurons
     auto neuron = Neuron<double>(3);
 

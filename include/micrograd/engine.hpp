@@ -42,16 +42,16 @@ protected:
     char m_op;
     std::array<Value<T> *, 2> m_prev; // previous values
     std::vector<Value<T> *>
-        m_sorted_values;              // vector to store the sorted values
-    std::unordered_set<Value<T> *> m_visited; // keep track of the visited nodes
+        m_sorted_values; // vector to store the sorted values
+    // keep track of the visited nodes
+    std::unordered_set<Value<T> *> m_visited;
     std::vector<std::shared_ptr<Value<T>>> m_tmp_value;
 
 public:
     // Constructor
     Value(T data, std::string label = "", char op = ' ',
           std::array<Value<T> *, 2> children = {nullptr, nullptr})
-        : label(label), data(data), grad(0.0), m_op(op),
-          m_prev(std::move(children)) {}
+        : label(label), data(data), grad(0.0), m_op(op), m_prev(children) {}
 
     // Operator Overloading
     // lvalues and rvalues because of const reference
@@ -109,7 +109,7 @@ public:
         os << "Value(data=" << v.data << ", grad=" << v.grad
            << ", label=" << v.label << ")";
         return os;
-    };
+    }
 
     // Other ops
     Value<T> inverse_value();
@@ -240,7 +240,6 @@ template <typename T> void Value<T>::_topo_sort(Value<T> *v) {
 }
 
 template <typename T> void Value<T>::backward() {
-
     // If empty do topo sort
     if (m_sorted_values.empty()) {
         _topo_sort(this);

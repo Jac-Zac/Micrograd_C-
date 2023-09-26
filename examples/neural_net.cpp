@@ -1,3 +1,9 @@
+//  neural_net.cpp
+//  micrograd_c++
+//
+//  created by jacopo zacchigna on 2023-02-19
+//  copyright © 2023 jacopo zacchigna. all rights reserved.
+
 #include <micrograd/nn.hpp>
 
 #define N_OUTPUT_LAYERS 3

@@ -1,3 +1,9 @@
+//  ops_example.cpp
+//  micrograd_c++
+//
+//  created by jacopo zacchigna on 2023-02-19
+//  copyright © 2023 jacopo zacchigna. all rights reserved.
+
 #include <micrograd/engine.hpp>
 
 using namespace value_engine;

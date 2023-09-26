@@ -1,3 +1,9 @@
+//  video_example.cpp
+//  Micrograd_C++
+//
+//  Created by Jacopo Zacchigna on 2023-02-19
+//  Copyright © 2023 Jacopo Zacchigna. All rights reserved.
+
 #include <micrograd/nn.hpp>
 
 #define SIZE 3
@@ -38,7 +44,7 @@ int main() {
     double lr = 0.005;
 
     for (size_t j = 1; j <= 1000; j++) {
-
+        // Defining useful vectors
         std::vector<Value_Vec<TYPE>> ypred;
         Value_Vec<TYPE> tmp_loss;
         Value<TYPE> loss = Value<TYPE>(0.0, "loss");

@@ -48,7 +48,7 @@ public:
     Value<T> operator()(const Value_Vec<T> &x);
 
     // Overriding
-    virtual std::vector<Value<T> *> parameters() override;
+    std::vector<Value<T> *> parameters() override;
 
 protected:
     size_t m_num_neurons_input;
@@ -56,8 +56,8 @@ protected:
     std::vector<Value<T>> m_weights;
     // I'm not propagating the gradient to the bias
     Value<T> m_bias;
-    using Module<T>::m_weighted_sums; // bring m_weighted_sums into the scope of
-                                      // Neuron
+    // bring m_weighted_sums into the scope Neuron
+    using Module<T>::m_weighted_sums;
 };
 
 // ---------------------------------------------------------
@@ -71,7 +71,7 @@ public:
     Value_Vec<T> operator()(const Value_Vec<T> &x);
 
     // Overriding
-    virtual std::vector<Value<T> *> parameters() override;
+    std::vector<Value<T> *> parameters() override;
 
 protected:
     // Create the neurons for the layer
@@ -89,7 +89,8 @@ public:
     Value_Vec<T> operator()(const Value_Vec<T> &x);
 
     Value<T> MSE_loss_backprop(std::vector<Value_Vec<T>> &input,
-                               std::vector<Value_Vec<T>> &target, size_t batch_size);
+                               std::vector<Value_Vec<T>> &target,
+                               size_t batch_size);
 
     // Declare the operator<< function as a friend function and get the
     // structure of the network
@@ -103,7 +104,7 @@ public:
     }
 
     // Overriding
-    virtual std::vector<Value<T> *> parameters() override;
+    std::vector<Value<T> *> parameters() override;
 
 public:
     std::vector<Layer<T>> m_layers;
@@ -113,8 +114,8 @@ protected:
     const size_t m_num_neurons_in;
     // N layers of the N + 1 total have outputs
     const std::array<size_t, N> m_num_neurons_out;
-    using Module<T>::m_layers_output; // bring m_layers_output into the scope of
-                                      // Neuron
+    // bring m_layers_output into the scope of Neuron
+    using Module<T>::m_layers_output;
 };
 
 //  ================ Implementation  Neuron =================
@@ -132,7 +133,6 @@ Neuron<T>::Neuron(size_t number_of_neurons_input, bool nonlin)
 // This can perhaps just take an in input std::vector<T> and not a vector of
 // values
 template <typename T> Value<T> Neuron<T>::operator()(const Value_Vec<T> &x) {
-
     m_weighted_sums.push_back(std::make_shared<Value<T>>(0.0));
 
     // Sum over all multiplies
@@ -182,7 +182,6 @@ Layer<T>::Layer(size_t num_neurons_input, size_t num_neurons_output,
 }
 
 template <typename T> Value_Vec<T> Layer<T>::operator()(const Value_Vec<T> &x) {
-
     // Create a vector of Value objects to return
     Value_Vec<T> m_neurons_output;
 
@@ -241,7 +240,8 @@ Value_Vec<T> MLP<T, N>::operator()(const Value_Vec<T> &x) {
 
 template <typename T, size_t N>
 Value<T> MLP<T, N>::MSE_loss_backprop(std::vector<Value_Vec<T>> &input,
-                                      std::vector<Value_Vec<T>> &target, size_t batch_size) {
+                                      std::vector<Value_Vec<T>> &target,
+                                      size_t batch_size) {
 
     Value_Vec<T> tmp_loss;
     std::vector<Value_Vec<T>> output;
