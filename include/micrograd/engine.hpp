@@ -32,21 +32,22 @@ enum ops_type : char {
 };
 
 template <typename T> class Value {
-public:
-    std::string label; // label of the value
-    T data;            // data of the value
-    T grad;            // gradient which by default is zero
+ public:
+    std::string label;  // label of the value
+    T data;             // data of the value
+    T grad;             // gradient which by default is zero
 
     /* protected: */
-protected:
+ protected:
     char m_op;
-    std::array<Value<T> *, 2> m_prev; // previous values
-    std::vector<Value<T> *>
-        m_sorted_values;              // vector to store the sorted values
-    std::unordered_set<Value<T> *> m_visited; // keep track of the visited nodes
+    std::array<Value<T> *, 2> m_prev;  // previous values
+    // vector to store the sorted values
+    std::vector<Value<T> *> m_sorted_values;
+    //// keep track of the visited nodes
+    std::unordered_set<Value<T> *> m_visited;
     std::vector<std::shared_ptr<Value<T>>> m_tmp_value;
 
-public:
+ public:
     // Constructor
     Value(T data, std::string label = "", char op = ' ',
           std::array<Value<T> *, 2> children = {nullptr, nullptr})
@@ -122,10 +123,10 @@ public:
     void backward();
     void draw_graph();
 
-protected:
+ protected:
     // Helper function to make a topological sort
     void _topo_sort(Value<T> *v);
-    void _backward_single(); // 1 step of backdrop
+    void _backward_single();  // 1 step of backdrop
 };
 
 // Adding aliases
@@ -240,7 +241,6 @@ template <typename T> void Value<T>::_topo_sort(Value<T> *v) {
 }
 
 template <typename T> void Value<T>::backward() {
-
     // If empty do topo sort
     if (m_sorted_values.empty()) {
         _topo_sort(this);
@@ -302,4 +302,4 @@ template <typename T> void Value<T>::draw_graph() {
     // Open the graph using the default viewer
     std::system("open graph.svg");
 }
-} // namespace value_engine
+}  // namespace value_engine
